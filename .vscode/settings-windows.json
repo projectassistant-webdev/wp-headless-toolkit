@@ -1,0 +1,199 @@
+{
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/**": true,
+    "**/.hg/store/**": true,
+    "**/dist/**": true,
+    "**/build/**": true,
+    "**/coverage/**": true,
+    "**/.next/**": true,
+    "**/.turbo/**": true,
+    "**/.yarn/**": true,
+    "**/.pnp.*": true,
+    "**/out/**": true,
+    "**/bin/**": true,
+    "**/obj/**": true,
+    "**/packages/**": true,
+    "**/__pycache__/**": true,
+    "**/.pytest_cache/**": true,
+    "**/venv/**": true,
+    "**/.venv/**": true,
+    "**/env/**": true,
+    "**/.env/**": true,
+    "**/.prism/**": true,
+    "**/docs/localdocs/**": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/bower_components": true,
+    "**/*.code-search": true,
+    "**/dist": true,
+    "**/build": true,
+    "**/coverage": true,
+    "**/.next": true,
+    "**/.turbo": true,
+    "**/out": true,
+    "**/.yarn": true,
+    "**/.pnp.*": true,
+    "**/bin": true,
+    "**/obj": true,
+    "**/packages": true,
+    "**/__pycache__": true,
+    "**/.pytest_cache": true,
+    "**/venv": true,
+    "**/.venv": true,
+    "**/env": true,
+    "**/.env": false,
+    "**/.prism": true,
+    "**/docs/localdocs": true
+  },
+  "files.exclude": {
+    "**/.git": false,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/CVS": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true,
+    "**/desktop.ini": true,
+    "**/__pycache__": true,
+    "**/.pytest_cache": true
+  },
+
+  // Performance optimizations for Windows
+  "editor.minimap.enabled": false,
+  "editor.overviewRulerBorder": false,
+  "editor.hideCursorInOverviewRuler": true,
+  "editor.renderWhitespace": "none",
+  "editor.cursorBlinking": "solid",
+  "editor.cursorSmoothCaretAnimation": "off",
+  "editor.smoothScrolling": false,
+  "editor.fastScrollSensitivity": 3,
+  "editor.mouseWheelScrollSensitivity": 1,
+  "editor.suggest.maxVisibleSuggestions": 10,
+  "editor.suggest.delay": 100,
+  "editor.quickSuggestions": {
+    "strings": false,
+    "comments": false,
+    "other": true
+  },
+
+  // Terminal performance (Windows specific)
+  "terminal.integrated.gpuAcceleration": "auto",
+  "terminal.integrated.scrollback": 1000,
+  "terminal.integrated.shell.windows": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+  "terminal.integrated.defaultProfile.windows": "PowerShell",
+
+  // Extension optimizations
+  "extensions.autoUpdate": false,
+  "extensions.autoCheckUpdates": false,
+  "extensions.ignoreRecommendations": true,
+
+  // Git optimizations
+  "git.autorefresh": false,
+  "git.autofetch": false,
+  "git.countBadge": "off",
+  "git.decorations.enabled": true,
+  "git.enableStatusBarSync": false,
+
+  // Search optimizations
+  "search.followSymlinks": false,
+  "search.maxResults": 8000,
+  "search.smartCase": true,
+  "search.useIgnoreFiles": true,
+
+  // File handling (Windows optimizations)
+  "files.autoSave": "off",
+  "files.hotExit": "onExitAndWindowClose",
+  "files.restoreUndoStack": false,
+  "files.maxMemoryForLargeFilesMB": 2048,
+  "files.eol": "\r\n",
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+
+  // Telemetry (reduces background processes)
+  "telemetry.telemetryLevel": "off",
+  "workbench.enableExperiments": false,
+  "workbench.settings.enableNaturalLanguageSearch": false,
+  "workbench.layoutControl.enabled": false,
+  "workbench.tips.enabled": false,
+
+  // Accessibility (disable if not needed)
+  "editor.accessibilitySupport": "off",
+
+  // Debug (disable inline values if not using debugger)
+  "debug.inlineValues": "off",
+
+  // Windows-specific path handling
+  "explorer.compactFolders": true,
+  "explorer.confirmDelete": false,
+  "explorer.confirmDragAndDrop": false,
+
+  // Bracket pair colorization (native)
+  "editor.bracketPairColorization.enabled": true,
+  "editor.guides.bracketPairs": "active",
+
+  // TypeScript/JavaScript optimizations
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.disableAutomaticTypeAcquisition": true,
+  "typescript.surveys.enabled": false,
+  "javascript.suggest.autoImports": true,
+  "typescript.suggest.autoImports": true,
+  "typescript.preferences.includePackageJsonAutoImports": "auto",
+
+  // Formatting
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit",
+    "source.organizeImports": "explicit"
+  },
+  "editor.formatOnSave": false,
+  "editor.formatOnPaste": false,
+  "editor.formatOnType": false,
+
+  // Editor settings
+  "editor.rulers": [80, 120],
+  "editor.wordWrap": "on",
+
+  // Language-specific formatting
+  "[python]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "ms-python.black-formatter"
+  },
+  "[typescript]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascript]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascriptreact]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[markdown]": {
+    "editor.formatOnSave": false,
+    "files.trimTrailingWhitespace": false
+  },
+
+  // Reduce visual effects (battery/performance)
+  "workbench.tree.indent": 16,
+  "workbench.tree.renderIndentGuides": "onHover",
+  "workbench.list.smoothScrolling": false,
+  "workbench.reduceMotion": "on",
+
+  // Problem/Output panel
+  "problems.autoReveal": false,
+  "output.smartScroll.enabled": false,
+
+  "// NOTE": "Add your workspace folder to Windows Defender exclusions for better performance",
+  "// NOTE2": "Consider using WSL2 for Node.js projects for better file system performance"
+}

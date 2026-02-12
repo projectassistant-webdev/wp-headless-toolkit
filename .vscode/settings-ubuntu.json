@@ -1,0 +1,215 @@
+{
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/**": true,
+    "**/.hg/store/**": true,
+    "**/dist/**": true,
+    "**/build/**": true,
+    "**/coverage/**": true,
+    "**/.next/**": true,
+    "**/.turbo/**": true,
+    "**/.yarn/**": true,
+    "**/.pnp.*": true,
+    "**/out/**": true,
+    "**/target/**": true,
+    "**/.venv/**": true,
+    "**/venv/**": true,
+    "**/__pycache__/**": true,
+    "**/snap/**": true,
+    "**/.prism/**": true,
+    "**/docs/localdocs/**": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/bower_components": true,
+    "**/*.code-search": true,
+    "**/dist": true,
+    "**/build": true,
+    "**/coverage": true,
+    "**/.next": true,
+    "**/.turbo": true,
+    "**/out": true,
+    "**/.yarn": true,
+    "**/.pnp.*": true,
+    "**/target": true,
+    "**/.venv": true,
+    "**/venv": true,
+    "**/__pycache__": true,
+    "**/snap": true,
+    "**/.prism": true,
+    "**/docs/localdocs": true
+  },
+  "files.exclude": {
+    "**/.git": false,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/CVS": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true,
+    "**/*~": true
+  },
+
+  // Performance optimizations for Linux
+  "editor.minimap.enabled": false,
+  "editor.overviewRulerBorder": false,
+  "editor.hideCursorInOverviewRuler": true,
+  "editor.renderWhitespace": "none",
+  "editor.cursorBlinking": "solid",
+  "editor.cursorSmoothCaretAnimation": "off",
+  "editor.smoothScrolling": false,
+  "editor.fastScrollSensitivity": 5,
+  "editor.mouseWheelScrollSensitivity": 2,
+  "editor.suggest.delay": 50,
+  "editor.quickSuggestions": {
+    "strings": false,
+    "comments": false,
+    "other": true
+  },
+
+  // Terminal performance (Ubuntu/Linux specific)
+  "terminal.integrated.gpuAcceleration": "on",
+  "terminal.integrated.scrollback": 2000,
+  "terminal.integrated.shell.linux": "/bin/bash",
+  "terminal.integrated.defaultProfile.linux": "bash",
+  "terminal.integrated.fontFamily": "monospace",
+
+  // Extension optimizations
+  "extensions.autoUpdate": false,
+  "extensions.autoCheckUpdates": false,
+  "extensions.ignoreRecommendations": true,
+
+  // Git optimizations
+  "git.autorefresh": false,
+  "git.autofetch": false,
+  "git.countBadge": "off",
+  "git.decorations.enabled": true,
+  "git.enableStatusBarSync": false,
+
+  // Search optimizations (Linux file system friendly)
+  "search.followSymlinks": false,
+  "search.maxResults": 15000,
+  "search.smartCase": true,
+  "search.useIgnoreFiles": true,
+  "search.useGlobalIgnoreFiles": true,
+  "search.useParentIgnoreFiles": true,
+
+  // File handling (Linux optimizations)
+  "files.autoSave": "off",
+  "files.hotExit": "onExitAndWindowClose",
+  "files.restoreUndoStack": false,
+  "files.maxMemoryForLargeFilesMB": 2048,
+  "files.eol": "\n",
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "files.associations": {
+    "*.env.*": "shellscript"
+  },
+
+  // Telemetry (reduces background processes)
+  "telemetry.telemetryLevel": "off",
+  "workbench.enableExperiments": false,
+  "workbench.settings.enableNaturalLanguageSearch": false,
+  "workbench.layoutControl.enabled": false,
+  "workbench.tips.enabled": false,
+
+  // Accessibility (disable if not needed)
+  "editor.accessibilitySupport": "off",
+
+  // Debug (disable inline values if not using debugger)
+  "debug.inlineValues": "off",
+
+  // Linux-specific file explorer
+  "explorer.compactFolders": true,
+  "explorer.confirmDelete": false,
+  "explorer.confirmDragAndDrop": false,
+  "explorer.sortOrder": "mixed",
+
+  // Bracket pair colorization (native)
+  "editor.bracketPairColorization.enabled": true,
+  "editor.guides.bracketPairs": "active",
+
+  // TypeScript/JavaScript optimizations
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.disableAutomaticTypeAcquisition": true,
+  "typescript.surveys.enabled": false,
+  "javascript.suggest.autoImports": true,
+  "typescript.suggest.autoImports": true,
+  "typescript.preferences.includePackageJsonAutoImports": "auto",
+
+  // Python-specific optimizations (common on Ubuntu)
+  "python.defaultInterpreterPath": "/usr/bin/python3",
+
+  // Formatting
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit",
+    "source.organizeImports": "explicit"
+  },
+  "editor.formatOnSave": false,
+  "editor.formatOnPaste": false,
+  "editor.formatOnType": false,
+
+  // Editor settings
+  "editor.rulers": [80, 120],
+  "editor.wordWrap": "on",
+
+  // Language-specific formatting
+  "[python]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "ms-python.black-formatter"
+  },
+  "[typescript]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascript]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascriptreact]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[markdown]": {
+    "editor.formatOnSave": false,
+    "files.trimTrailingWhitespace": false
+  },
+
+  // Reduce visual effects (better for integrated graphics)
+  "workbench.tree.indent": 16,
+  "workbench.tree.renderIndentGuides": "onHover",
+  "workbench.list.smoothScrolling": false,
+  "workbench.reduceMotion": "auto",
+  "workbench.iconTheme": "vs-minimal",
+
+  // Problem/Output panel
+  "problems.autoReveal": false,
+  "output.smartScroll.enabled": false,
+
+  // Ubuntu-specific optimizations
+  "window.titleBarStyle": "custom",
+  "window.menuBarVisibility": "toggle",
+  "update.mode": "manual",
+
+  // Memory management for resource-constrained systems
+  "typescript.tsc.autoDetect": "off",
+  "npm.autoDetect": "off",
+  "grunt.autoDetect": "off",
+  "gulp.autoDetect": "off",
+
+  // Development server optimizations
+  "remote.autoForwardPorts": false,
+  "remote.restoreForwardedPorts": false,
+
+  "// NOTE": "For Docker development: Add workspace to Docker Desktop file sharing",
+  "// NOTE2": "Consider using NVM for Node.js version management",
+  "// NOTE3": "Install build-essential for native module compilation: sudo apt install build-essential"
+}
