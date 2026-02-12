@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<ruleset name="PA Headless Toolkit Coding Standards">
+	<description>PA Headless Toolkit Coding Standards</description>
+
+	<!-- Scan these files -->
+	<file>access-functions.php</file>
+	<file>pa-headless-toolkit.php</file>
+	<file>activation.php</file>
+	<file>deactivation.php</file>
+	<file>src/</file>
+
+	<!-- Set the minimum PHP version -->
+	<config name="minimum_php_version" value="8.1"/>
+
+	<!-- Set the minimum WP version -->
+	<config name="minimum_wp_version" value="6.4"/>
+
+	<!-- Set the text domain -->
+	<config name="text_domain" value="pa-headless-toolkit"/>
+
+	<!-- Set the prefixes -->
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+		<properties>
+			<property name="prefixes" type="array">
+				<element value="pa_headless"/>
+				<element value="ProjectAssistant\HeadlessToolkit"/>
+				<element value="PA_HEADLESS"/>
+			</property>
+		</properties>
+	</rule>
+</ruleset>

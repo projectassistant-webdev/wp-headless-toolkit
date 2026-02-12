@@ -1,0 +1,85 @@
+{
+	"name": "projectassistant/wordpress-headless-toolkit",
+	"description": "Unified headless WordPress plugin for Next.js projects - ISR revalidation, REST security, CORS, preview mode, and more.",
+	"type": "wordpress-plugin",
+	"license": "GPL-3.0-or-later",
+	"authors": [
+		{
+			"name": "Project Assistant",
+			"homepage": "https://projectassistant.org"
+		}
+	],
+	"require": {
+		"php": ">=8.1",
+		"ext-json": "*"
+	},
+	"require-dev": {
+		"axepress/wp-graphql-cs": "^2.0.0",
+		"axepress/wp-graphql-stubs": "^2.3.0",
+		"phpstan/phpstan": "^2.0",
+		"phpstan/extension-installer": "^1.1",
+		"phpstan/phpstan-deprecation-rules": "^2.0.1",
+		"szepeviktor/phpstan-wordpress": "^2.0",
+		"lucatume/wp-browser": "^4.0",
+		"wp-graphql/wp-graphql-testcase": "^3.4"
+	},
+	"config": {
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true,
+			"phpstan/extension-installer": true
+		},
+		"platform": {
+			"php": "8.1"
+		},
+		"process-timeout": 0,
+		"optimize-autoloader": true
+	},
+	"autoload": {
+		"files": [
+			"access-functions.php"
+		],
+		"psr-4": {
+			"ProjectAssistant\\HeadlessToolkit\\": "src/"
+		}
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"Tests\\ProjectAssistant\\HeadlessToolkit\\": "tests/_support/"
+		}
+	},
+	"extra": {
+		"installer-name": "pa-headless-toolkit"
+	},
+	"scripts": {
+		"lint": "vendor/bin/phpcs",
+		"check-cs": [
+			"php ./vendor/bin/phpcs"
+		],
+		"fix-cs": [
+			"php ./vendor/bin/phpcbf"
+		],
+		"phpstan": [
+			"vendor/bin/phpstan analyze --ansi --memory-limit=1G"
+		]
+	},
+	"archive": {
+		"name": "pa-headless-toolkit",
+		"exclude": [
+			"/.*",
+			"bin",
+			"docker",
+			"docs",
+			"phpstan",
+			"tests",
+			"!vendor",
+			"/codeception.dist.yml",
+			"/codeception.yml",
+			"/composer.json",
+			"/composer.lock",
+			"/docker-compose.yml",
+			"/phpstan.neon.dist",
+			"/phpunit.xml.dist",
+			"/README.md"
+		]
+	}
+}
