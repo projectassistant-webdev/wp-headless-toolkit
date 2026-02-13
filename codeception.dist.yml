@@ -1,0 +1,37 @@
+namespace: Tests\ProjectAssistant\HeadlessToolkit
+
+paths:
+  tests: tests
+  output: tests/_output
+  data: tests/_data
+  support: tests/_support
+  envs: tests/_envs
+
+actor_suffix: Tester
+
+extensions:
+  enabled:
+    - Codeception\Extension\RunFailed
+
+suites:
+  wpunit:
+    actor: WpunitTester
+    path: WPUnit
+    bootstrap: _bootstrap.php
+    modules:
+      enabled:
+        - lucatume\WPBrowser\Module\WPLoader:
+            wpRootFolder: /var/www/html
+            dbName: wordpress_test
+            dbHost: mysql
+            dbUser: root
+            dbPassword: root
+            tablePrefix: wp_
+            domain: localhost
+            adminEmail: admin@example.com
+            plugins:
+              - wp-graphql/wp-graphql.php
+              - wp-headless-toolkit/wp-headless-toolkit.php
+            activatePlugins:
+              - wp-graphql/wp-graphql.php
+              - wp-headless-toolkit/wp-headless-toolkit.php

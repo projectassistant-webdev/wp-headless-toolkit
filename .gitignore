@@ -7,6 +7,7 @@
 
 # Dependencies
 node_modules/
+vendor/
 __pycache__/
 *.py[cod]
 *$py.class
@@ -98,6 +99,10 @@ docs/localdocs/  # Exported documentation from hosted LocalDocs (can be re-expor
 .pytest_cache/
 test-results/
 coverage.xml
+
+# Codeception (generated files - codeception.dist.yml is the committed template)
+codeception.yml
+tests/_output/
 
 # Jupyter Notebook
 .ipynb_checkpoints
