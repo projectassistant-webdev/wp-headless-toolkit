@@ -141,11 +141,9 @@ definitions:
           - cp codeception.dist.yml codeception.yml
           - "sed -i 's/dbHost:.*mysql/dbHost: 127.0.0.1/' codeception.yml"
 
-          # Prevent WP cron shutdown fatal: $_SERVER['REQUEST_URI'] undefined in CLI.
-          - export REQUEST_URI=/
-
-          # Run Codeception WPUnit tests with fail-fast for quicker feedback
-          - vendor/bin/codecept run wpunit --fail-fast
+          # Run Codeception WPUnit tests with fail-fast for quicker feedback.
+          # REQUEST_URI prevents WP cron shutdown fatal (undefined in CLI).
+          - REQUEST_URI=/ vendor/bin/codecept run wpunit --fail-fast
 
     - step: &create-release-tag
         name: "Create Release Tag"
