@@ -48,6 +48,8 @@ definitions:
           - mysql
         script:
           - export COMPOSER_ALLOW_SUPERUSER=1
+          # Increase PHP memory limit for WP-CLI extraction
+          - echo "memory_limit = 512M" > /usr/local/etc/php/conf.d/memory.ini
           # Install system dependencies
           - apt-get update && apt-get install -y --no-install-recommends
             git unzip zip less mariadb-client subversion
