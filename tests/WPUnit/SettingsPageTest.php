@@ -445,6 +445,8 @@ class SettingsPageTest extends WPTestCase {
 	 * Test that render_page outputs the plugin name.
 	 */
 	public function test_render_page_outputs_plugin_name(): void {
+		$admin_id = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		wp_set_current_user( $admin_id );
 		Main::instance();
 
 		ob_start();
@@ -458,6 +460,8 @@ class SettingsPageTest extends WPTestCase {
 	 * Test that render_page contains a module status table.
 	 */
 	public function test_render_page_contains_module_status_table(): void {
+		$admin_id = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		wp_set_current_user( $admin_id );
 		Main::instance();
 
 		ob_start();
@@ -472,6 +476,8 @@ class SettingsPageTest extends WPTestCase {
 	 * Test that render_page contains environment config section.
 	 */
 	public function test_render_page_contains_env_config_section(): void {
+		$admin_id = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		wp_set_current_user( $admin_id );
 		Main::instance();
 
 		ob_start();
@@ -485,6 +491,8 @@ class SettingsPageTest extends WPTestCase {
 	 * Test that render_page contains a documentation link.
 	 */
 	public function test_render_page_contains_documentation_link(): void {
+		$admin_id = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		wp_set_current_user( $admin_id );
 		Main::instance();
 
 		ob_start();
@@ -503,6 +511,8 @@ class SettingsPageTest extends WPTestCase {
 	 * Test that render_page shows enabled modules.
 	 */
 	public function test_render_page_shows_enabled_modules(): void {
+		$admin_id = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		wp_set_current_user( $admin_id );
 		Main::instance();
 
 		ob_start();
@@ -516,6 +526,8 @@ class SettingsPageTest extends WPTestCase {
 	 * Test that render_page shows disabled modules.
 	 */
 	public function test_render_page_shows_disabled_modules(): void {
+		$admin_id = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		wp_set_current_user( $admin_id );
 		$this->set_env( 'WP_HEADLESS_DISABLE_HEAD_CLEANUP', 'true' );
 		Main::instance();
 
@@ -524,6 +536,46 @@ class SettingsPageTest extends WPTestCase {
 		$output = ob_get_clean();
 
 		$this->assertStringContainsString( 'Disabled', $output, 'Rendered page should show Disabled text for inactive modules' );
+	}
+
+	// -------------------------------------------------------------------------
+	// 5b. Page Rendering Security Tests (TD-SEC-005)
+	// -------------------------------------------------------------------------
+
+	/**
+	 * Test that render_page blocks users without manage_options capability.
+	 *
+	 * A subscriber or editor should not be able to render the settings page.
+	 * The method must call wp_die() for unauthorized users.
+	 */
+	public function test_render_page_blocks_unauthorized_users(): void {
+		// Create a subscriber (no manage_options capability).
+		$subscriber_id = self::factory()->user->create( [ 'role' => 'subscriber' ] );
+		wp_set_current_user( $subscriber_id );
+
+		$this->expectException( \WPDieException::class );
+
+		$this->settings_page->render_page();
+	}
+
+	/**
+	 * Test that render_page allows users with manage_options capability.
+	 */
+	public function test_render_page_allows_admin_users(): void {
+		$admin_id = self::factory()->user->create( [ 'role' => 'administrator' ] );
+		wp_set_current_user( $admin_id );
+
+		Main::instance();
+
+		ob_start();
+		$this->settings_page->render_page();
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString(
+			'WP Headless Toolkit',
+			$output,
+			'Admin users with manage_options must be able to view the settings page.'
+		);
 	}
 
 	// -------------------------------------------------------------------------
