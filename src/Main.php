@@ -51,14 +51,14 @@ if ( ! class_exists( 'ProjectAssistant\HeadlessToolkit\Main' ) ) :
 				self::$instance->includes();
 				self::$instance->load_modules();
 				self::$instance->load_admin();
-			}
 
-			/**
-			 * Fire off init action.
-			 *
-			 * @param self $instance The instance of the plugin class.
-			 */
-			do_action( 'wp_headless_init', self::$instance );
+				/**
+				 * Fire off init action.
+				 *
+				 * @param self $instance The instance of the plugin class.
+				 */
+				do_action( 'wp_headless_init', self::$instance );
+			}
 
 			return self::$instance;
 		}
