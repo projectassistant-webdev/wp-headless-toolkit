@@ -52,7 +52,7 @@ if ( ! class_exists( 'ProjectAssistant\HeadlessToolkit\Main' ) ) :
 			 *
 			 * @param self $instance The instance of the plugin class.
 			 */
-			do_action( 'pa_headless_init', self::$instance );
+			do_action( 'wp_headless_init', self::$instance );
 
 			return self::$instance;
 		}
@@ -63,8 +63,8 @@ if ( ! class_exists( 'ProjectAssistant\HeadlessToolkit\Main' ) ) :
 		 * @codeCoverageIgnore
 		 */
 		private function includes(): void {
-			if ( defined( 'PA_HEADLESS_AUTOLOAD' ) && false !== PA_HEADLESS_AUTOLOAD && defined( 'PA_HEADLESS_PLUGIN_DIR' ) ) {
-				require_once PA_HEADLESS_PLUGIN_DIR . 'vendor/autoload.php';
+			if ( defined( 'WP_HEADLESS_AUTOLOAD' ) && false !== WP_HEADLESS_AUTOLOAD && defined( 'WP_HEADLESS_PLUGIN_DIR' ) ) {
+				require_once WP_HEADLESS_PLUGIN_DIR . 'vendor/autoload.php';
 			}
 		}
 
@@ -77,7 +77,7 @@ if ( ! class_exists( 'ProjectAssistant\HeadlessToolkit\Main' ) ) :
 			 *
 			 * @param string[] $module_classes Array of module class names implementing ModuleInterface.
 			 */
-			$module_classes = apply_filters( 'pa_headless_module_classes', $this->get_default_modules() );
+			$module_classes = apply_filters( 'wp_headless_module_classes', $this->get_default_modules() );
 
 			foreach ( $module_classes as $module_class ) {
 				if ( ! is_a( $module_class, ModuleInterface::class, true ) ) {
@@ -98,7 +98,7 @@ if ( ! class_exists( 'ProjectAssistant\HeadlessToolkit\Main' ) ) :
 			 *
 			 * @param ModuleInterface[] $modules The loaded module instances.
 			 */
-			do_action( 'pa_headless_modules_loaded', $this->modules );
+			do_action( 'wp_headless_modules_loaded', $this->modules );
 		}
 
 		/**
@@ -142,7 +142,7 @@ if ( ! class_exists( 'ProjectAssistant\HeadlessToolkit\Main' ) ) :
 		 * @codeCoverageIgnore
 		 */
 		public function __clone() {
-			_doing_it_wrong( __FUNCTION__, esc_html__( 'The plugin Main class should not be cloned.', 'pa-headless-toolkit' ), '1.0.0' );
+			_doing_it_wrong( __FUNCTION__, esc_html__( 'The plugin Main class should not be cloned.', 'wp-headless-toolkit' ), '1.0.0' );
 		}
 
 		/**
@@ -151,7 +151,7 @@ if ( ! class_exists( 'ProjectAssistant\HeadlessToolkit\Main' ) ) :
 		 * @codeCoverageIgnore
 		 */
 		public function __wakeup(): void {
-			_doing_it_wrong( __FUNCTION__, esc_html__( 'De-serializing instances of the plugin Main class is not allowed.', 'pa-headless-toolkit' ), '1.0.0' );
+			_doing_it_wrong( __FUNCTION__, esc_html__( 'De-serializing instances of the plugin Main class is not allowed.', 'wp-headless-toolkit' ), '1.0.0' );
 		}
 	}
 endif;

@@ -27,9 +27,9 @@ class MainTest extends WPTestCase {
 		$instance_prop->setValue( null, null );
 
 		// Remove any test filters added during tests.
-		remove_all_filters( 'pa_headless_module_classes' );
-		remove_all_filters( 'pa_headless_init' );
-		remove_all_filters( 'pa_headless_modules_loaded' );
+		remove_all_filters( 'wp_headless_module_classes' );
+		remove_all_filters( 'wp_headless_init' );
+		remove_all_filters( 'wp_headless_modules_loaded' );
 
 		parent::tear_down();
 	}
@@ -63,7 +63,7 @@ class MainTest extends WPTestCase {
 	public function test_load_modules_registers_default_modules(): void {
 		// Filter module classes to only include MigrateDbCompat (we can control its enablement).
 		add_filter(
-			'pa_headless_module_classes',
+			'wp_headless_module_classes',
 			static function () {
 				// Use an empty array - modules with unmet dependencies won't load.
 				// We just verify the mechanism works.
@@ -84,7 +84,7 @@ class MainTest extends WPTestCase {
 	 */
 	public function test_load_modules_skips_non_module_interface(): void {
 		add_filter(
-			'pa_headless_module_classes',
+			'wp_headless_module_classes',
 			static function () {
 				// stdClass does not implement ModuleInterface.
 				return [ \stdClass::class ];
@@ -103,7 +103,7 @@ class MainTest extends WPTestCase {
 	public function test_load_modules_skips_disabled_modules(): void {
 		// MigrateDbCompat::is_enabled() returns false in test env (no WPMDB).
 		add_filter(
-			'pa_headless_module_classes',
+			'wp_headless_module_classes',
 			static function () {
 				return [ MigrateDbCompat::class ];
 			}
@@ -132,7 +132,7 @@ class MainTest extends WPTestCase {
 		}
 
 		add_filter(
-			'pa_headless_module_classes',
+			'wp_headless_module_classes',
 			static function () {
 				return [ MigrateDbCompat::class ];
 			}
@@ -157,12 +157,12 @@ class MainTest extends WPTestCase {
 	}
 
 	/**
-	 * Test that pa_headless_init action fires with Main instance on first instance() call.
+	 * Test that wp_headless_init action fires with Main instance on first instance() call.
 	 */
-	public function test_pa_headless_init_action_fires(): void {
+	public function test_wp_headless_init_action_fires(): void {
 		$received_instance = null;
 		add_action(
-			'pa_headless_init',
+			'wp_headless_init',
 			static function ( $instance ) use ( &$received_instance ): void {
 				$received_instance = $instance;
 			}
@@ -170,20 +170,20 @@ class MainTest extends WPTestCase {
 
 		$instance = Main::instance();
 
-		$this->assertNotNull( $received_instance, 'pa_headless_init action must fire on instance() call.' );
-		$this->assertSame( $instance, $received_instance, 'pa_headless_init must pass the Main instance.' );
+		$this->assertNotNull( $received_instance, 'wp_headless_init action must fire on instance() call.' );
+		$this->assertSame( $instance, $received_instance, 'wp_headless_init must pass the Main instance.' );
 	}
 
 	/**
-	 * Test that pa_headless_init action fires on EVERY call to instance(), not just the first.
+	 * Test that wp_headless_init action fires on EVERY call to instance(), not just the first.
 	 *
-	 * Per M-2 note: The current Main::instance() fires do_action('pa_headless_init')
+	 * Per M-2 note: The current Main::instance() fires do_action('wp_headless_init')
 	 * outside the singleton guard, so it fires on every call.
 	 */
-	public function test_pa_headless_init_action_fires_on_every_instance_call(): void {
+	public function test_wp_headless_init_action_fires_on_every_instance_call(): void {
 		$fire_count = 0;
 		add_action(
-			'pa_headless_init',
+			'wp_headless_init',
 			static function () use ( &$fire_count ): void {
 				++$fire_count;
 			}
@@ -193,16 +193,16 @@ class MainTest extends WPTestCase {
 		Main::instance();
 		Main::instance();
 
-		$this->assertSame( 3, $fire_count, 'pa_headless_init must fire on every instance() call (3 calls = 3 fires).' );
+		$this->assertSame( 3, $fire_count, 'wp_headless_init must fire on every instance() call (3 calls = 3 fires).' );
 	}
 
 	/**
-	 * Test that pa_headless_modules_loaded action fires with module array.
+	 * Test that wp_headless_modules_loaded action fires with module array.
 	 */
-	public function test_pa_headless_modules_loaded_action_fires(): void {
+	public function test_wp_headless_modules_loaded_action_fires(): void {
 		$received_modules = null;
 		add_action(
-			'pa_headless_modules_loaded',
+			'wp_headless_modules_loaded',
 			static function ( $modules ) use ( &$received_modules ): void {
 				$received_modules = $modules;
 			}
@@ -210,17 +210,17 @@ class MainTest extends WPTestCase {
 
 		Main::instance();
 
-		$this->assertNotNull( $received_modules, 'pa_headless_modules_loaded action must fire.' );
-		$this->assertIsArray( $received_modules, 'pa_headless_modules_loaded must pass an array of modules.' );
+		$this->assertNotNull( $received_modules, 'wp_headless_modules_loaded action must fire.' );
+		$this->assertIsArray( $received_modules, 'wp_headless_modules_loaded must pass an array of modules.' );
 	}
 
 	/**
-	 * Test that pa_headless_module_classes filter can modify module classes.
+	 * Test that wp_headless_module_classes filter can modify module classes.
 	 */
-	public function test_pa_headless_module_classes_filter(): void {
+	public function test_wp_headless_module_classes_filter(): void {
 		$filter_called = false;
 		add_filter(
-			'pa_headless_module_classes',
+			'wp_headless_module_classes',
 			static function ( $classes ) use ( &$filter_called ) {
 				$filter_called = true;
 				// Return empty array to prove the filter is respected.
@@ -230,7 +230,7 @@ class MainTest extends WPTestCase {
 
 		$instance = Main::instance();
 
-		$this->assertTrue( $filter_called, 'pa_headless_module_classes filter must be called during module loading.' );
+		$this->assertTrue( $filter_called, 'wp_headless_module_classes filter must be called during module loading.' );
 		$this->assertEmpty( $instance->get_modules(), 'When filter returns empty array, no modules should be loaded.' );
 	}
 }

@@ -22,7 +22,7 @@ class MigrateDbCompatTest extends WPTestCase {
 		remove_all_filters( 'wpmdb_upload_dir' );
 		remove_all_filters( 'wpmdb_upload_info' );
 		remove_all_filters( 'wpmdb_get_path' );
-		remove_all_filters( 'pa_headless_module_enabled' );
+		remove_all_filters( 'wp_headless_module_enabled' );
 
 		parent::tear_down();
 	}
@@ -69,7 +69,7 @@ class MigrateDbCompatTest extends WPTestCase {
 	 */
 	public function test_is_enabled_false_when_disabled_via_filter(): void {
 		add_filter(
-			'pa_headless_module_enabled',
+			'wp_headless_module_enabled',
 			static function ( $enabled, $slug ) {
 				if ( 'migrate_db_compat' === $slug ) {
 					return false;
@@ -82,7 +82,7 @@ class MigrateDbCompatTest extends WPTestCase {
 
 		$this->assertFalse(
 			MigrateDbCompat::is_enabled(),
-			'is_enabled() must return false when disabled via pa_headless_module_enabled filter.'
+			'is_enabled() must return false when disabled via wp_headless_module_enabled filter.'
 		);
 	}
 

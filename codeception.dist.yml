@@ -31,7 +31,7 @@ suites:
             adminEmail: admin@example.com
             plugins:
               - wp-graphql/wp-graphql.php
-              - pa-headless-toolkit/pa-headless-toolkit.php
+              - wp-headless-toolkit/wp-headless-toolkit.php
             activatePlugins:
               - wp-graphql/wp-graphql.php
-              - pa-headless-toolkit/pa-headless-toolkit.php
+              - wp-headless-toolkit/wp-headless-toolkit.php

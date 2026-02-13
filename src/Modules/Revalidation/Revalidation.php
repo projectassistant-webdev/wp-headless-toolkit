@@ -40,7 +40,7 @@ class Revalidation implements ModuleInterface {
 	 * {@inheritDoc}
 	 */
 	public static function is_enabled(): bool {
-		if ( ! pa_headless_is_module_enabled( self::get_slug() ) ) {
+		if ( ! wp_headless_is_module_enabled( self::get_slug() ) ) {
 			return false;
 		}
 
@@ -86,7 +86,7 @@ class Revalidation implements ModuleInterface {
 		 *
 		 * @param string[] $post_types Array of post type slugs.
 		 */
-		$post_types = apply_filters( 'pa_headless_revalidation_post_types', [ 'post', 'page' ] );
+		$post_types = apply_filters( 'wp_headless_revalidation_post_types', [ 'post', 'page' ] );
 
 		if ( ! in_array( $post->post_type, $post_types, true ) ) {
 			return;
@@ -162,7 +162,7 @@ class Revalidation implements ModuleInterface {
 		 * @param string[] $tags The revalidation tags.
 		 * @param \WP_Post $post The post object.
 		 */
-		return apply_filters( 'pa_headless_revalidation_tags', $tags, $post );
+		return apply_filters( 'wp_headless_revalidation_tags', $tags, $post );
 	}
 
 	/**
@@ -200,7 +200,7 @@ class Revalidation implements ModuleInterface {
 		 * @param string[] $tags The revalidation tags.
 		 * @param string   $url  The revalidation URL.
 		 */
-		$args = apply_filters( 'pa_headless_revalidation_request_args', $args, $tags, $url );
+		$args = apply_filters( 'wp_headless_revalidation_request_args', $args, $tags, $url );
 
 		wp_remote_post( $url, $args );
 
@@ -210,6 +210,6 @@ class Revalidation implements ModuleInterface {
 		 * @param string[] $tags The revalidation tags.
 		 * @param string   $url  The revalidation URL.
 		 */
-		do_action( 'pa_headless_revalidation_sent', $tags, $url );
+		do_action( 'wp_headless_revalidation_sent', $tags, $url );
 	}
 }

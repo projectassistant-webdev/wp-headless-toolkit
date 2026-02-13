@@ -1,4 +1,4 @@
-# PA Headless Toolkit - Docker Test Environment
+# WP Headless Toolkit - Docker Test Environment
 # Port Block: 13 (HTTP: 9300, MySQL: 3436)
 # Usage:
 #   docker compose up -d                              # Start services
@@ -27,12 +27,12 @@ services:
       WP_TESTS_DB_NAME: ${WP_TESTS_DB_NAME:-wordpress_test}
     volumes:
       # Mount the entire plugin source into the WordPress plugins directory
-      - .:/var/www/html/wp-content/plugins/pa-headless-toolkit
+      - .:/var/www/html/wp-content/plugins/wp-headless-toolkit
     depends_on:
       mysql:
         condition: service_healthy
     networks:
-      - pa-headless-net
+      - wp-headless-net
 
   mysql:
     image: mysql:8.0
@@ -50,11 +50,11 @@ services:
       retries: 10
       start_period: 10s
     networks:
-      - pa-headless-net
+      - wp-headless-net
 
 volumes:
   mysql_data:
 
 networks:
-  pa-headless-net:
+  wp-headless-net:
     driver: bridge

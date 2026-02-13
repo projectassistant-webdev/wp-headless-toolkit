@@ -1,12 +1,12 @@
 <?php
 /**
- * Plugin Name: PA Headless Toolkit
+ * Plugin Name: WP Headless Toolkit
  * Plugin URI: https://bitbucket.org/projectassistant/wordpress-headless-toolkit
  * Description: Unified headless WordPress plugin for Next.js projects - ISR revalidation, REST security, CORS, preview mode, and more.
  * Author: Project Assistant
  * Author URI: https://projectassistant.org
  * Version: 1.0.0
- * Text Domain: pa-headless-toolkit
+ * Text Domain: wp-headless-toolkit
  * Domain Path: /languages
  * Requires at least: 6.4
  * Tested up to: 6.8
@@ -35,42 +35,42 @@ if ( file_exists( __DIR__ . '/c3.php' ) ) {
 // Run this function when the plugin is activated.
 if ( file_exists( __DIR__ . '/activation.php' ) ) {
 	require_once __DIR__ . '/activation.php';
-	register_activation_hook( __FILE__, 'pa_headless_activation_callback' );
+	register_activation_hook( __FILE__, 'wp_headless_activation_callback' );
 }
 
 // Run this function when the plugin is deactivated.
 if ( file_exists( __DIR__ . '/deactivation.php' ) ) {
 	require_once __DIR__ . '/deactivation.php';
-	register_deactivation_hook( __FILE__, 'pa_headless_deactivation_callback' );
+	register_deactivation_hook( __FILE__, 'wp_headless_deactivation_callback' );
 }
 
 /**
  * Define plugin constants.
  */
-function pa_headless_constants(): void {
+function wp_headless_constants(): void {
 	// Plugin version.
-	if ( ! defined( 'PA_HEADLESS_VERSION' ) ) {
-		define( 'PA_HEADLESS_VERSION', '1.0.0' );
+	if ( ! defined( 'WP_HEADLESS_VERSION' ) ) {
+		define( 'WP_HEADLESS_VERSION', '1.0.0' );
 	}
 
 	// Plugin Folder Path.
-	if ( ! defined( 'PA_HEADLESS_PLUGIN_DIR' ) ) {
-		define( 'PA_HEADLESS_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+	if ( ! defined( 'WP_HEADLESS_PLUGIN_DIR' ) ) {
+		define( 'WP_HEADLESS_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 	}
 
 	// Plugin Folder URL.
-	if ( ! defined( 'PA_HEADLESS_PLUGIN_URL' ) ) {
-		define( 'PA_HEADLESS_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+	if ( ! defined( 'WP_HEADLESS_PLUGIN_URL' ) ) {
+		define( 'WP_HEADLESS_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 	}
 
 	// Plugin Root File.
-	if ( ! defined( 'PA_HEADLESS_PLUGIN_FILE' ) ) {
-		define( 'PA_HEADLESS_PLUGIN_FILE', __FILE__ );
+	if ( ! defined( 'WP_HEADLESS_PLUGIN_FILE' ) ) {
+		define( 'WP_HEADLESS_PLUGIN_FILE', __FILE__ );
 	}
 
 	// Whether to autoload the files or not.
-	if ( ! defined( 'PA_HEADLESS_AUTOLOAD' ) ) {
-		define( 'PA_HEADLESS_AUTOLOAD', true );
+	if ( ! defined( 'WP_HEADLESS_AUTOLOAD' ) ) {
+		define( 'WP_HEADLESS_AUTOLOAD', true );
 	}
 }
 
@@ -79,7 +79,7 @@ function pa_headless_constants(): void {
  *
  * @return string[]
  */
-function pa_headless_dependencies_not_ready(): array {
+function wp_headless_dependencies_not_ready(): array {
 	$deps = [];
 
 	if ( ! class_exists( '\WPGraphQL' ) ) {
@@ -92,13 +92,13 @@ function pa_headless_dependencies_not_ready(): array {
 /**
  * Initializes plugin.
  */
-function pa_headless_init(): void {
-	pa_headless_constants();
+function wp_headless_init(): void {
+	wp_headless_constants();
 
-	$not_ready = pa_headless_dependencies_not_ready();
+	$not_ready = wp_headless_dependencies_not_ready();
 
-	if ( empty( $not_ready ) && defined( 'PA_HEADLESS_PLUGIN_DIR' ) ) {
-		require_once PA_HEADLESS_PLUGIN_DIR . 'src/Main.php';
+	if ( empty( $not_ready ) && defined( 'WP_HEADLESS_PLUGIN_DIR' ) ) {
+		require_once WP_HEADLESS_PLUGIN_DIR . 'src/Main.php';
 		return;
 	}
 
@@ -112,7 +112,7 @@ function pa_headless_init(): void {
 						<?php
 							printf(
 								/* translators: dependency not ready error message */
-								esc_html__( '%1$s must be active for PA Headless Toolkit to work.', 'pa-headless-toolkit' ),
+								esc_html__( '%1$s must be active for WP Headless Toolkit to work.', 'wp-headless-toolkit' ),
 								esc_html( $dep )
 							);
 						?>
@@ -124,4 +124,4 @@ function pa_headless_init(): void {
 	}
 }
 
-add_action( 'graphql_init', 'pa_headless_init' );
+add_action( 'graphql_init', 'wp_headless_init' );

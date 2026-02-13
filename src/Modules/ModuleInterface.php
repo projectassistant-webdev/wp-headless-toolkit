@@ -28,7 +28,7 @@ interface ModuleInterface {
 	 * Check if this module is enabled.
 	 *
 	 * Modules are enabled by default and can be disabled via
-	 * constants (PA_HEADLESS_DISABLE_{SLUG}) or filters.
+	 * constants (WP_HEADLESS_DISABLE_{SLUG}) or filters.
 	 *
 	 * @return bool
 	 */

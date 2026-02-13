@@ -32,7 +32,7 @@ class ActivationTest extends WPTestCase {
 	 * (closure) instead of executing the activation logic directly.
 	 */
 	public function test_activation_callback_return_type_is_void(): void {
-		$reflection = new \ReflectionFunction( 'pa_headless_activation_callback' );
+		$reflection = new \ReflectionFunction( 'wp_headless_activation_callback' );
 		$return_type = $reflection->getReturnType();
 
 		$this->assertNotNull( $return_type, 'Activation callback must have a return type declaration.' );
@@ -47,7 +47,7 @@ class ActivationTest extends WPTestCase {
 	 * (closure) instead of executing the deactivation logic directly.
 	 */
 	public function test_deactivation_callback_return_type_is_void(): void {
-		$reflection = new \ReflectionFunction( 'pa_headless_deactivation_callback' );
+		$reflection = new \ReflectionFunction( 'wp_headless_deactivation_callback' );
 		$return_type = $reflection->getReturnType();
 
 		$this->assertNotNull( $return_type, 'Deactivation callback must have a return type declaration.' );
@@ -60,57 +60,57 @@ class ActivationTest extends WPTestCase {
 	 */
 	public function test_activation_callback_stores_version(): void {
 		// Ensure the option does not exist before activation.
-		delete_option( 'pa_headless_toolkit_version' );
+		delete_option( 'wp_headless_toolkit_version' );
 
 		// Define the version constant if not already defined.
-		if ( ! defined( 'PA_HEADLESS_VERSION' ) ) {
-			define( 'PA_HEADLESS_VERSION', '1.0.0' );
+		if ( ! defined( 'WP_HEADLESS_VERSION' ) ) {
+			define( 'WP_HEADLESS_VERSION', '1.0.0' );
 		}
 
 		// Run the activation callback.
-		pa_headless_activation_callback();
+		wp_headless_activation_callback();
 
 		// Verify the version option was stored.
-		$stored_version = get_option( 'pa_headless_toolkit_version' );
-		$this->assertSame( PA_HEADLESS_VERSION, $stored_version, 'Activation must store the plugin version in the pa_headless_toolkit_version option.' );
+		$stored_version = get_option( 'wp_headless_toolkit_version' );
+		$this->assertSame( WP_HEADLESS_VERSION, $stored_version, 'Activation must store the plugin version in the wp_headless_toolkit_version option.' );
 	}
 
 	/**
-	 * Test that activation callback fires the pa_headless_activate action.
+	 * Test that activation callback fires the wp_headless_activate action.
 	 */
 	public function test_activation_callback_fires_action(): void {
 		$action_fired = false;
 		add_action(
-			'pa_headless_activate',
+			'wp_headless_activate',
 			static function () use ( &$action_fired ): void {
 				$action_fired = true;
 			}
 		);
 
 		// Define the version constant if not already defined.
-		if ( ! defined( 'PA_HEADLESS_VERSION' ) ) {
-			define( 'PA_HEADLESS_VERSION', '1.0.0' );
+		if ( ! defined( 'WP_HEADLESS_VERSION' ) ) {
+			define( 'WP_HEADLESS_VERSION', '1.0.0' );
 		}
 
-		pa_headless_activation_callback();
+		wp_headless_activation_callback();
 
-		$this->assertTrue( $action_fired, 'Activation must fire the pa_headless_activate action.' );
+		$this->assertTrue( $action_fired, 'Activation must fire the wp_headless_activate action.' );
 	}
 
 	/**
-	 * Test that deactivation callback fires the pa_headless_deactivate action.
+	 * Test that deactivation callback fires the wp_headless_deactivate action.
 	 */
 	public function test_deactivation_callback_fires_action(): void {
 		$action_fired = false;
 		add_action(
-			'pa_headless_deactivate',
+			'wp_headless_deactivate',
 			static function () use ( &$action_fired ): void {
 				$action_fired = true;
 			}
 		);
 
-		pa_headless_deactivation_callback();
+		wp_headless_deactivation_callback();
 
-		$this->assertTrue( $action_fired, 'Deactivation must fire the pa_headless_deactivate action.' );
+		$this->assertTrue( $action_fired, 'Deactivation must fire the wp_headless_deactivate action.' );
 	}
 }

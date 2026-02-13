@@ -33,7 +33,7 @@ class MigrateDbCompat implements ModuleInterface {
 	 * {@inheritDoc}
 	 */
 	public static function is_enabled(): bool {
-		if ( ! pa_headless_is_module_enabled( self::get_slug() ) ) {
+		if ( ! wp_headless_is_module_enabled( self::get_slug() ) ) {
 			return false;
 		}
 

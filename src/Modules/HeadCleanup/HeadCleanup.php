@@ -34,7 +34,7 @@ class HeadCleanup implements ModuleInterface {
 	 * {@inheritDoc}
 	 */
 	public static function is_enabled(): bool {
-		return pa_headless_is_module_enabled( self::get_slug() );
+		return wp_headless_is_module_enabled( self::get_slug() );
 	}
 
 	/**
@@ -75,7 +75,7 @@ class HeadCleanup implements ModuleInterface {
 		 *
 		 * @param array $additional_removals Additional items to remove.
 		 */
-		$additional = apply_filters( 'pa_headless_head_cleanup_removals', [] );
+		$additional = apply_filters( 'wp_headless_head_cleanup_removals', [] );
 
 		foreach ( $additional as $removal ) {
 			if ( isset( $removal[0], $removal[1] ) ) {
