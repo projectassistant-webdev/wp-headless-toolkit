@@ -12,6 +12,7 @@ use ProjectAssistant\HeadlessToolkit\Modules\Revalidation\Revalidation;
 use ProjectAssistant\HeadlessToolkit\Modules\RestSecurity\RestSecurity;
 use ProjectAssistant\HeadlessToolkit\Modules\FrontendRedirect\FrontendRedirect;
 use ProjectAssistant\HeadlessToolkit\Modules\MigrateDbCompat\MigrateDbCompat;
+use ProjectAssistant\HeadlessToolkit\Admin\SettingsPage;
 use ProjectAssistant\HeadlessToolkit\Modules\HeadCleanup\HeadCleanup;
 
 if ( ! class_exists( 'ProjectAssistant\HeadlessToolkit\Main' ) ) :
@@ -45,6 +46,7 @@ if ( ! class_exists( 'ProjectAssistant\HeadlessToolkit\Main' ) ) :
 				self::$instance = new self();
 				self::$instance->includes();
 				self::$instance->load_modules();
+				self::$instance->load_admin();
 			}
 
 			/**
@@ -134,6 +136,28 @@ if ( ! class_exists( 'ProjectAssistant\HeadlessToolkit\Main' ) ) :
 		 */
 		public function get_modules(): array {
 			return $this->modules;
+		}
+
+		/**
+		 * Get all registered module classes (including those that may be disabled).
+		 *
+		 * Returns the full list of module classes after filter application,
+		 * regardless of whether each module is currently enabled.
+		 *
+		 * @return string[]
+		 */
+		public function get_registered_module_classes(): array {
+			return apply_filters( 'wp_headless_module_classes', $this->get_default_modules() );
+		}
+
+		/**
+		 * Load admin-only components.
+		 */
+		private function load_admin(): void {
+			if ( is_admin() ) {
+				$settings_page = new SettingsPage();
+				$settings_page->init();
+			}
 		}
 
 		/**
