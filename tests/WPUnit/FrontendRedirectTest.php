@@ -229,6 +229,26 @@ class FrontendRedirectTest extends WPTestCase {
 
 		$this->assertNotFalse( has_filter( 'preview_post_link', [ $this->module, 'rewrite_preview_link' ] ) );
 		$this->assertSame( 10, has_filter( 'preview_post_link', [ $this->module, 'rewrite_preview_link' ] ) );
+
+		// Verify the filter is registered with accepted_args=2 so it receives the $post parameter.
+		global $wp_filter;
+		$hook     = $wp_filter['preview_post_link'] ?? null;
+		$this->assertNotNull( $hook, 'preview_post_link hook should be registered.' );
+
+		$found_accepted_args = null;
+		foreach ( $hook->callbacks[10] ?? [] as $callback_entry ) {
+			if (
+				is_array( $callback_entry['function'] ) &&
+				$callback_entry['function'][0] === $this->module &&
+				$callback_entry['function'][1] === 'rewrite_preview_link'
+			) {
+				$found_accepted_args = $callback_entry['accepted_args'];
+				break;
+			}
+		}
+
+		$this->assertNotNull( $found_accepted_args, 'rewrite_preview_link callback should exist at priority 10.' );
+		$this->assertSame( 2, $found_accepted_args, 'preview_post_link filter must accept 2 args (preview_link and post).' );
 	}
 
 	// -------------------------------------------------------------------
@@ -241,16 +261,13 @@ class FrontendRedirectTest extends WPTestCase {
 	public function test_maybe_redirect_skips_when_admin(): void {
 		set_current_screen( 'dashboard' );
 
-		$redirected = false;
-		add_filter( 'wp_redirect', function () use ( &$redirected ) {
-			$redirected = true;
-			return false;
-		} );
+		// Safety trap: if a regression fires wp_redirect(), throw instead of exit().
+		$this->install_redirect_trap();
 
-		// Since is_admin() will return true, maybe_redirect returns early.
-		// It won't call wp_redirect, so no exit occurs.
 		$this->module->maybe_redirect();
-		$this->assertFalse( $redirected, 'Should not redirect for admin requests.' );
+
+		// If we reach here, no redirect was fired (the trap didn't throw).
+		$this->assertNull( $this->captured_redirect_url, 'Should not redirect for admin requests.' );
 	}
 
 	/**
@@ -259,14 +276,12 @@ class FrontendRedirectTest extends WPTestCase {
 	public function test_maybe_redirect_skips_for_login_page(): void {
 		$GLOBALS['pagenow'] = 'wp-login.php';
 
-		$redirected = false;
-		add_filter( 'wp_redirect', function () use ( &$redirected ) {
-			$redirected = true;
-			return false;
-		} );
+		// Safety trap: if a regression fires wp_redirect(), throw instead of exit().
+		$this->install_redirect_trap();
 
 		$this->module->maybe_redirect();
-		$this->assertFalse( $redirected, 'Should not redirect for login page.' );
+
+		$this->assertNull( $this->captured_redirect_url, 'Should not redirect for login page.' );
 	}
 
 	/**
@@ -275,14 +290,12 @@ class FrontendRedirectTest extends WPTestCase {
 	public function test_maybe_redirect_skips_for_register_page(): void {
 		$GLOBALS['pagenow'] = 'wp-register.php';
 
-		$redirected = false;
-		add_filter( 'wp_redirect', function () use ( &$redirected ) {
-			$redirected = true;
-			return false;
-		} );
+		// Safety trap: if a regression fires wp_redirect(), throw instead of exit().
+		$this->install_redirect_trap();
 
 		$this->module->maybe_redirect();
-		$this->assertFalse( $redirected, 'Should not redirect for register page.' );
+
+		$this->assertNull( $this->captured_redirect_url, 'Should not redirect for register page.' );
 	}
 
 	/**
@@ -291,14 +304,12 @@ class FrontendRedirectTest extends WPTestCase {
 	public function test_passthrough_filter_can_force_passthrough(): void {
 		add_filter( 'wp_headless_is_passthrough_request', '__return_true' );
 
-		$redirected = false;
-		add_filter( 'wp_redirect', function () use ( &$redirected ) {
-			$redirected = true;
-			return false;
-		} );
+		// Safety trap: if a regression fires wp_redirect(), throw instead of exit().
+		$this->install_redirect_trap();
 
 		$this->module->maybe_redirect();
-		$this->assertFalse( $redirected, 'Should not redirect when passthrough filter returns true.' );
+
+		$this->assertNull( $this->captured_redirect_url, 'Should not redirect when passthrough filter returns true.' );
 	}
 
 	// -------------------------------------------------------------------
@@ -335,14 +346,12 @@ class FrontendRedirectTest extends WPTestCase {
 	public function test_maybe_redirect_does_not_redirect_without_frontend_url(): void {
 		putenv( 'HEADLESS_FRONTEND_URL' );
 
-		$redirected = false;
-		add_filter( 'wp_redirect', function () use ( &$redirected ) {
-			$redirected = true;
-			return false;
-		} );
+		// Safety trap: if a regression fires wp_redirect(), throw instead of exit().
+		$this->install_redirect_trap();
 
 		$this->module->maybe_redirect();
-		$this->assertFalse( $redirected, 'Should not redirect without HEADLESS_FRONTEND_URL.' );
+
+		$this->assertNull( $this->captured_redirect_url, 'Should not redirect without HEADLESS_FRONTEND_URL.' );
 	}
 
 	/**
@@ -495,27 +504,47 @@ class FrontendRedirectTest extends WPTestCase {
 	public function test_rewrite_preview_link_with_custom_post_type(): void {
 		register_post_type( 'product', [ 'public' => true ] );
 
-		$post = self::factory()->post->create_and_get( [
-			'post_type'   => 'product',
-			'post_status' => 'draft',
-		] );
+		try {
+			$post = self::factory()->post->create_and_get( [
+				'post_type'   => 'product',
+				'post_status' => 'draft',
+			] );
 
-		$result = $this->module->rewrite_preview_link( 'https://wp.example.com/preview/', $post );
+			$result = $this->module->rewrite_preview_link( 'https://wp.example.com/preview/', $post );
 
-		$parsed = wp_parse_url( $result );
-		parse_str( $parsed['query'] ?? '', $query_args );
-		$this->assertSame( 'product', $query_args['type'] );
-		$this->assertSame( (string) $post->ID, $query_args['id'] );
-		$this->assertSame( 'draft', $query_args['status'] );
+			$parsed = wp_parse_url( $result );
+			parse_str( $parsed['query'] ?? '', $query_args );
+			$this->assertSame( 'product', $query_args['type'] );
+			$this->assertSame( (string) $post->ID, $query_args['id'] );
+			$this->assertSame( 'draft', $query_args['status'] );
+		} finally {
+			unregister_post_type( 'product' );
+		}
 	}
 
 	// -------------------------------------------------------------------
 	// 7. Passthrough Tests (constant-defining -- MUST run LAST)
+	// -------------------------------------------------------------------
 	//
-	// These tests define PHP constants that persist across the entire
-	// test process. They are placed at the end of the file so they
-	// don't interfere with redirect behavior tests that require
-	// is_passthrough_request() to return false.
+	// WARNING - EXECUTION ORDER DEPENDENCY:
+	//
+	// These tests define PHP constants (WP_CLI, REST_REQUEST, DOING_AJAX,
+	// DOING_CRON, GRAPHQL_HTTP_REQUEST) that persist for the lifetime of
+	// the PHP process. PHP constants cannot be undefined or redefined
+	// once set.
+	//
+	// Because is_passthrough_request() checks these constants, defining
+	// them as `true` causes ALL subsequent calls to maybe_redirect() to
+	// return early (passthrough). If these tests ran before the redirect
+	// behavior tests in sections 4-6, those tests would never trigger a
+	// redirect and would produce false positives.
+	//
+	// PHPUnit (and Codeception wpunit) executes test methods in the order
+	// they appear in the file. This section MUST remain at the end of the
+	// class to guarantee correct behaviour.
+	//
+	// DO NOT move these tests above the redirect behavior tests.
+	// DO NOT add new redirect behavior tests after this section.
 	// -------------------------------------------------------------------
 
 	/**
@@ -524,13 +553,11 @@ class FrontendRedirectTest extends WPTestCase {
 	public function test_maybe_redirect_skips_for_wp_cli_request(): void {
 		if ( defined( 'WP_CLI' ) ) {
 			if ( WP_CLI ) {
-				$redirected = false;
-				add_filter( 'wp_redirect', function () use ( &$redirected ) {
-					$redirected = true;
-					return false;
-				} );
+				// Safety trap: if a regression fires wp_redirect(), throw instead of exit().
+				$this->install_redirect_trap();
+
 				$this->module->maybe_redirect();
-				$this->assertFalse( $redirected, 'Should not redirect for WP-CLI requests.' );
+				$this->assertNull( $this->captured_redirect_url, 'Should not redirect for WP-CLI requests.' );
 			} else {
 				$this->markTestSkipped( 'WP_CLI constant is defined as false; cannot redefine.' );
 			}
@@ -539,14 +566,11 @@ class FrontendRedirectTest extends WPTestCase {
 
 		define( 'WP_CLI', true );
 
-		$redirected = false;
-		add_filter( 'wp_redirect', function () use ( &$redirected ) {
-			$redirected = true;
-			return false;
-		} );
+		// Safety trap: if a regression fires wp_redirect(), throw instead of exit().
+		$this->install_redirect_trap();
 
 		$this->module->maybe_redirect();
-		$this->assertFalse( $redirected, 'Should not redirect for WP-CLI requests.' );
+		$this->assertNull( $this->captured_redirect_url, 'Should not redirect for WP-CLI requests.' );
 	}
 
 	/**
@@ -555,13 +579,11 @@ class FrontendRedirectTest extends WPTestCase {
 	public function test_maybe_redirect_skips_for_rest_request(): void {
 		if ( defined( 'REST_REQUEST' ) ) {
 			if ( REST_REQUEST ) {
-				$redirected = false;
-				add_filter( 'wp_redirect', function () use ( &$redirected ) {
-					$redirected = true;
-					return false;
-				} );
+				// Safety trap: if a regression fires wp_redirect(), throw instead of exit().
+				$this->install_redirect_trap();
+
 				$this->module->maybe_redirect();
-				$this->assertFalse( $redirected, 'Should not redirect for REST requests.' );
+				$this->assertNull( $this->captured_redirect_url, 'Should not redirect for REST requests.' );
 			} else {
 				$this->markTestSkipped( 'REST_REQUEST constant is defined as false; cannot redefine.' );
 			}
@@ -570,14 +592,11 @@ class FrontendRedirectTest extends WPTestCase {
 
 		define( 'REST_REQUEST', true );
 
-		$redirected = false;
-		add_filter( 'wp_redirect', function () use ( &$redirected ) {
-			$redirected = true;
-			return false;
-		} );
+		// Safety trap: if a regression fires wp_redirect(), throw instead of exit().
+		$this->install_redirect_trap();
 
 		$this->module->maybe_redirect();
-		$this->assertFalse( $redirected, 'Should not redirect for REST requests.' );
+		$this->assertNull( $this->captured_redirect_url, 'Should not redirect for REST requests.' );
 	}
 
 	/**
@@ -586,13 +605,11 @@ class FrontendRedirectTest extends WPTestCase {
 	public function test_maybe_redirect_skips_for_ajax_request(): void {
 		if ( defined( 'DOING_AJAX' ) ) {
 			if ( DOING_AJAX ) {
-				$redirected = false;
-				add_filter( 'wp_redirect', function () use ( &$redirected ) {
-					$redirected = true;
-					return false;
-				} );
+				// Safety trap: if a regression fires wp_redirect(), throw instead of exit().
+				$this->install_redirect_trap();
+
 				$this->module->maybe_redirect();
-				$this->assertFalse( $redirected, 'Should not redirect for AJAX requests.' );
+				$this->assertNull( $this->captured_redirect_url, 'Should not redirect for AJAX requests.' );
 			} else {
 				$this->markTestSkipped( 'DOING_AJAX constant is defined as false; cannot redefine.' );
 			}
@@ -601,14 +618,11 @@ class FrontendRedirectTest extends WPTestCase {
 
 		define( 'DOING_AJAX', true );
 
-		$redirected = false;
-		add_filter( 'wp_redirect', function () use ( &$redirected ) {
-			$redirected = true;
-			return false;
-		} );
+		// Safety trap: if a regression fires wp_redirect(), throw instead of exit().
+		$this->install_redirect_trap();
 
 		$this->module->maybe_redirect();
-		$this->assertFalse( $redirected, 'Should not redirect for AJAX requests.' );
+		$this->assertNull( $this->captured_redirect_url, 'Should not redirect for AJAX requests.' );
 	}
 
 	/**
@@ -617,13 +631,11 @@ class FrontendRedirectTest extends WPTestCase {
 	public function test_maybe_redirect_skips_for_cron_request(): void {
 		if ( defined( 'DOING_CRON' ) ) {
 			if ( DOING_CRON ) {
-				$redirected = false;
-				add_filter( 'wp_redirect', function () use ( &$redirected ) {
-					$redirected = true;
-					return false;
-				} );
+				// Safety trap: if a regression fires wp_redirect(), throw instead of exit().
+				$this->install_redirect_trap();
+
 				$this->module->maybe_redirect();
-				$this->assertFalse( $redirected, 'Should not redirect for cron requests.' );
+				$this->assertNull( $this->captured_redirect_url, 'Should not redirect for cron requests.' );
 			} else {
 				$this->markTestSkipped( 'DOING_CRON constant is defined as false; cannot redefine.' );
 			}
@@ -632,14 +644,11 @@ class FrontendRedirectTest extends WPTestCase {
 
 		define( 'DOING_CRON', true );
 
-		$redirected = false;
-		add_filter( 'wp_redirect', function () use ( &$redirected ) {
-			$redirected = true;
-			return false;
-		} );
+		// Safety trap: if a regression fires wp_redirect(), throw instead of exit().
+		$this->install_redirect_trap();
 
 		$this->module->maybe_redirect();
-		$this->assertFalse( $redirected, 'Should not redirect for cron requests.' );
+		$this->assertNull( $this->captured_redirect_url, 'Should not redirect for cron requests.' );
 	}
 
 	/**
@@ -648,13 +657,11 @@ class FrontendRedirectTest extends WPTestCase {
 	public function test_maybe_redirect_skips_for_graphql_request(): void {
 		if ( defined( 'GRAPHQL_HTTP_REQUEST' ) ) {
 			if ( GRAPHQL_HTTP_REQUEST ) {
-				$redirected = false;
-				add_filter( 'wp_redirect', function () use ( &$redirected ) {
-					$redirected = true;
-					return false;
-				} );
+				// Safety trap: if a regression fires wp_redirect(), throw instead of exit().
+				$this->install_redirect_trap();
+
 				$this->module->maybe_redirect();
-				$this->assertFalse( $redirected, 'Should not redirect for GraphQL requests.' );
+				$this->assertNull( $this->captured_redirect_url, 'Should not redirect for GraphQL requests.' );
 			} else {
 				$this->markTestSkipped( 'GRAPHQL_HTTP_REQUEST constant is defined as false; cannot redefine.' );
 			}
@@ -663,13 +670,10 @@ class FrontendRedirectTest extends WPTestCase {
 
 		define( 'GRAPHQL_HTTP_REQUEST', true );
 
-		$redirected = false;
-		add_filter( 'wp_redirect', function () use ( &$redirected ) {
-			$redirected = true;
-			return false;
-		} );
+		// Safety trap: if a regression fires wp_redirect(), throw instead of exit().
+		$this->install_redirect_trap();
 
 		$this->module->maybe_redirect();
-		$this->assertFalse( $redirected, 'Should not redirect for GraphQL requests.' );
+		$this->assertNull( $this->captured_redirect_url, 'Should not redirect for GraphQL requests.' );
 	}
 }
