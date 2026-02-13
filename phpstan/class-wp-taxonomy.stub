@@ -58,7 +58,7 @@ class WP_Taxonomy {
 	/** @var object */
 	public $cap;
 
-	/** @var array|false */
+	/** @var array<string, mixed>|false */
 	public $rewrite;
 
 	/** @var string|bool */
@@ -79,7 +79,7 @@ class WP_Taxonomy {
 	/** @var bool */
 	public $_builtin;
 
-	/** @var array */
+	/** @var array<string, mixed> */
 	public $args;
 
 	/** @var string */
