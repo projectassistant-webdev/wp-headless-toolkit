@@ -9,6 +9,10 @@
  */
 
 // Prevent WP cron shutdown fatal: $_SERVER['REQUEST_URI'] is undefined in CLI.
+// DISABLE_WP_CRON causes _wp_cron() to return early, avoiding the access.
+if ( ! defined( 'DISABLE_WP_CRON' ) ) {
+	define( 'DISABLE_WP_CRON', true );
+}
 if ( ! isset( $_SERVER['REQUEST_URI'] ) ) {
 	$_SERVER['REQUEST_URI'] = '/';
 }
