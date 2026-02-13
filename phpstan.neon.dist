@@ -1,0 +1,22 @@
+parameters:
+	level: 8
+	phpVersion: 80100
+	inferPrivatePropertyTypeFromConstructor: true
+	checkExplicitMixedMissingReturn: true
+	checkFunctionNameCase: true
+	checkInternalClassCaseSensitivity: true
+	treatPhpDocTypesAsCertain: false
+	bootstrapFiles:
+		- phpstan/constants.php
+		- pa-headless-toolkit.php
+		- access-functions.php
+		- activation.php
+		- deactivation.php
+	paths:
+		- src/
+	stubFiles:
+		- phpstan/class-wp-post-type.stub
+		- phpstan/class-wp-taxonomy.stub
+	ignoreErrors:
+		- '#Function pa_headless_get_config not found#'
+		- '#Function pa_headless_is_module_enabled not found#'
