@@ -16,7 +16,7 @@
  *
  * @return mixed
  */
-function pa_headless_get_config( string $key, $default_value = '' ) {
+function wp_headless_get_config( string $key, $default_value = '' ) {
 	// Check environment variable first (Bedrock .env compatible).
 	$env_value = getenv( $key );
 	if ( false !== $env_value ) {
@@ -34,7 +34,7 @@ function pa_headless_get_config( string $key, $default_value = '' ) {
 	 * @param mixed  $value The value of the config key.
 	 * @param string $key   The config key.
 	 */
-	return apply_filters( 'pa_headless_config_value', $default_value, $key );
+	return apply_filters( 'wp_headless_config_value', $default_value, $key );
 }
 
 /**
@@ -44,14 +44,14 @@ function pa_headless_get_config( string $key, $default_value = '' ) {
  *
  * @return bool
  */
-function pa_headless_is_module_enabled( string $slug ): bool {
-	// Check for disable constant (e.g. PA_HEADLESS_DISABLE_CORS).
-	$constant_name = 'PA_HEADLESS_DISABLE_' . strtoupper( $slug );
+function wp_headless_is_module_enabled( string $slug ): bool {
+	// Check for disable constant (e.g. WP_HEADLESS_DISABLE_CORS).
+	$constant_name = 'WP_HEADLESS_DISABLE_' . strtoupper( $slug );
 	if ( defined( $constant_name ) && constant( $constant_name ) ) {
 		return false;
 	}
 
-	// Check environment variable (e.g. PA_HEADLESS_DISABLE_CORS=true).
+	// Check environment variable (e.g. WP_HEADLESS_DISABLE_CORS=true).
 	$env_value = getenv( $constant_name );
 	if ( false !== $env_value && in_array( strtolower( $env_value ), [ 'true', '1', 'yes' ], true ) ) {
 		return false;
@@ -63,5 +63,5 @@ function pa_headless_is_module_enabled( string $slug ): bool {
 	 * @param bool   $enabled Whether the module is enabled.
 	 * @param string $slug    The module slug.
 	 */
-	return (bool) apply_filters( 'pa_headless_module_enabled', true, $slug );
+	return (bool) apply_filters( 'wp_headless_module_enabled', true, $slug );
 }

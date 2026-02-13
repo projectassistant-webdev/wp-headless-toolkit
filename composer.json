@@ -48,7 +48,7 @@
 		}
 	},
 	"extra": {
-		"installer-name": "pa-headless-toolkit"
+		"installer-name": "wp-headless-toolkit"
 	},
 	"scripts": {
 		"lint": "vendor/bin/phpcs",
@@ -63,7 +63,7 @@
 		]
 	},
 	"archive": {
-		"name": "pa-headless-toolkit",
+		"name": "wp-headless-toolkit",
 		"exclude": [
 			"/.*",
 			"bin",

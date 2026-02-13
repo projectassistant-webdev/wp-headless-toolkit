@@ -35,7 +35,7 @@ class RestSecurity implements ModuleInterface {
 	 * {@inheritDoc}
 	 */
 	public static function is_enabled(): bool {
-		return pa_headless_is_module_enabled( self::get_slug() );
+		return wp_headless_is_module_enabled( self::get_slug() );
 	}
 
 	/**
@@ -64,7 +64,7 @@ class RestSecurity implements ModuleInterface {
 		 *
 		 * @param string[] $blocked_prefixes Array of endpoint path prefixes to block.
 		 */
-		$blocked_prefixes = apply_filters( 'pa_headless_rest_blocked_prefixes', [
+		$blocked_prefixes = apply_filters( 'wp_headless_rest_blocked_prefixes', [
 			'/wp/v2/comments',
 			'/wp/v2/users',
 			'/wp/v2/search',
@@ -108,7 +108,7 @@ class RestSecurity implements ModuleInterface {
 		 *
 		 * @param string[] $allowed_prefixes Array of endpoint path prefixes to allow.
 		 */
-		$allowed_prefixes = apply_filters( 'pa_headless_rest_allowed_prefixes', [
+		$allowed_prefixes = apply_filters( 'wp_headless_rest_allowed_prefixes', [
 			'/wp-site-health/',
 			'/wp/v2/settings',
 			'/wpgraphql/',

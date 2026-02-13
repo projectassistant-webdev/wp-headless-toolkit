@@ -38,7 +38,7 @@ class FrontendRedirect implements ModuleInterface {
 	 * {@inheritDoc}
 	 */
 	public static function is_enabled(): bool {
-		if ( ! pa_headless_is_module_enabled( self::get_slug() ) ) {
+		if ( ! wp_headless_is_module_enabled( self::get_slug() ) ) {
 			return false;
 		}
 
@@ -78,7 +78,7 @@ class FrontendRedirect implements ModuleInterface {
 		 * @param string $request_uri  The original request URI.
 		 * @param string $frontend_url The configured frontend URL.
 		 */
-		$redirect_url = apply_filters( 'pa_headless_redirect_url', $redirect_url, $request_uri, $frontend_url );
+		$redirect_url = apply_filters( 'wp_headless_redirect_url', $redirect_url, $request_uri, $frontend_url );
 
 		wp_redirect( $redirect_url, 301 );
 		exit;
@@ -114,7 +114,7 @@ class FrontendRedirect implements ModuleInterface {
 		 * @param string   $preview_link The original preview link.
 		 * @param \WP_Post $post        The post being previewed.
 		 */
-		return apply_filters( 'pa_headless_preview_link', $preview_url, $preview_link, $post );
+		return apply_filters( 'wp_headless_preview_link', $preview_url, $preview_link, $post );
 	}
 
 	/**
@@ -163,6 +163,6 @@ class FrontendRedirect implements ModuleInterface {
 		 *
 		 * @param bool $is_passthrough Whether this is a passthrough request.
 		 */
-		return (bool) apply_filters( 'pa_headless_is_passthrough_request', false );
+		return (bool) apply_filters( 'wp_headless_is_passthrough_request', false );
 	}
 }

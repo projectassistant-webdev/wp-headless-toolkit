@@ -1,10 +1,10 @@
 #!/bin/bash
 set -euo pipefail
 
-# PA Headless Toolkit - Docker Entrypoint Setup Script
+# WP Headless Toolkit - Docker Entrypoint Setup Script
 # Waits for MySQL, installs WordPress + WPGraphQL, activates plugin, runs Composer
 
-PLUGIN_DIR="/var/www/html/wp-content/plugins/pa-headless-toolkit"
+PLUGIN_DIR="/var/www/html/wp-content/plugins/wp-headless-toolkit"
 WPGRAPHQL_VERSION="1.27.0"
 
 # ---------------------------------------------------------------------------
@@ -93,7 +93,7 @@ install_wordpress() {
 
     wp core install \
         --url="http://localhost" \
-        --title="PA Headless Toolkit Test" \
+        --title="WP Headless Toolkit Test" \
         --admin_user="${WORDPRESS_ADMIN_USER:-admin}" \
         --admin_password="${WORDPRESS_ADMIN_PASSWORD:-admin}" \
         --admin_email="${WORDPRESS_ADMIN_EMAIL:-admin@example.com}" \
@@ -121,7 +121,7 @@ install_wpgraphql() {
 }
 
 # ---------------------------------------------------------------------------
-# Activate the PA Headless Toolkit plugin
+# Activate the WP Headless Toolkit plugin
 # ---------------------------------------------------------------------------
 activate_plugin() {
     if [ ! -d "$PLUGIN_DIR" ]; then
@@ -139,10 +139,10 @@ activate_plugin() {
     cd /var/www/html
 
     # Activate the plugin
-    echo "[setup] Activating PA Headless Toolkit..."
-    wp plugin activate pa-headless-toolkit
+    echo "[setup] Activating WP Headless Toolkit..."
+    wp plugin activate wp-headless-toolkit
 
-    echo "[setup] PA Headless Toolkit activated"
+    echo "[setup] WP Headless Toolkit activated"
 }
 
 # ---------------------------------------------------------------------------
@@ -185,7 +185,7 @@ define( 'DB_CHARSET', 'utf8' );
 define( 'DB_COLLATE', '' );
 define( 'WP_TESTS_DOMAIN', 'localhost' );
 define( 'WP_TESTS_EMAIL', '${WORDPRESS_ADMIN_EMAIL:-admin@example.com}' );
-define( 'WP_TESTS_TITLE', 'PA Headless Toolkit Tests' );
+define( 'WP_TESTS_TITLE', 'WP Headless Toolkit Tests' );
 define( 'WP_PHP_BINARY', 'php' );
 \$table_prefix = 'wptests_';
 WPCONFIG
@@ -198,7 +198,7 @@ WPCONFIG
 # ---------------------------------------------------------------------------
 main() {
     echo "============================================="
-    echo " PA Headless Toolkit - Docker Setup"
+    echo " WP Headless Toolkit - Docker Setup"
     echo "============================================="
 
     wait_for_mysql

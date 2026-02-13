@@ -21,7 +21,7 @@ class Config {
 	 * @return mixed
 	 */
 	public static function get( string $key, $default = '' ) {
-		return pa_headless_get_config( $key, $default );
+		return wp_headless_get_config( $key, $default );
 	}
 
 	/**

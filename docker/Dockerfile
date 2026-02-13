@@ -1,4 +1,4 @@
-# PA Headless Toolkit - WordPress Test Environment
+# WP Headless Toolkit - WordPress Test Environment
 # Based on official WordPress image with PHP 8.1+
 # Adds Composer, WP-CLI, and Codeception dependencies
 
