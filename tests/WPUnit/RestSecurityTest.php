@@ -203,6 +203,11 @@ class RestSecurityTest extends WPTestCase {
 			$result,
 			'filter_endpoints() must remove endpoints starting with /wp/v2/users.'
 		);
+		$this->assertArrayNotHasKey(
+			'/wp/v2/users/(?P<id>[\\d]+)',
+			$result,
+			'filter_endpoints() must remove sub-endpoints of /wp/v2/users.'
+		);
 	}
 
 	/**
@@ -273,6 +278,44 @@ class RestSecurityTest extends WPTestCase {
 			$endpoints,
 			$result,
 			'filter_endpoints() must return all endpoints unchanged for admin users.'
+		);
+	}
+
+	/**
+	 * Test that filter_endpoints() still filters for subscriber (non-admin) users.
+	 */
+	public function test_filter_endpoints_filters_for_subscriber_user(): void {
+		$subscriber_id = self::factory()->user->create( [ 'role' => 'subscriber' ] );
+		wp_set_current_user( $subscriber_id );
+
+		$endpoints = [
+			'/wp/v2/comments'      => [ 'handler' ],
+			'/wp/v2/users'         => [ 'handler' ],
+			'/wp/v2/search'        => [ 'handler' ],
+			'/wp/v2/posts'         => [ 'handler' ],
+		];
+
+		$result = $this->module->filter_endpoints( $endpoints );
+
+		$this->assertArrayNotHasKey(
+			'/wp/v2/comments',
+			$result,
+			'filter_endpoints() must still remove blocked endpoints for subscriber users.'
+		);
+		$this->assertArrayNotHasKey(
+			'/wp/v2/users',
+			$result,
+			'filter_endpoints() must still remove blocked endpoints for subscriber users.'
+		);
+		$this->assertArrayNotHasKey(
+			'/wp/v2/search',
+			$result,
+			'filter_endpoints() must still remove blocked endpoints for subscriber users.'
+		);
+		$this->assertArrayHasKey(
+			'/wp/v2/posts',
+			$result,
+			'filter_endpoints() must preserve allowed endpoints for subscriber users.'
 		);
 	}
 
@@ -461,24 +504,22 @@ class RestSecurityTest extends WPTestCase {
 	}
 
 	/**
-	 * Test that restrict handles missing $GLOBALS['wp'] gracefully.
+	 * Test that restrict handles missing rest_route query var gracefully.
+	 *
+	 * When $GLOBALS['wp']->query_vars exists but has no 'rest_route' key,
+	 * the implementation uses the null coalescing operator (??) to default
+	 * to an empty string, so no route matches any allowed prefix.
 	 */
-	public function test_restrict_handles_missing_wp_global(): void {
-		// Temporarily unset $GLOBALS['wp'] to simulate early REST call.
-		unset( $GLOBALS['wp'] );
-
-		// This should not throw an error/warning.
-		// Note: The current implementation will throw a warning/error because
-		// it accesses $GLOBALS['wp']->query_vars without checking if $GLOBALS['wp'] exists.
-		// We verify it either handles gracefully or we document the edge case.
-		$GLOBALS['wp'] = new \stdClass();
+	public function test_restrict_handles_missing_rest_route_query_var(): void {
+		// Ensure $GLOBALS['wp'] exists but has no rest_route key.
+		$GLOBALS['wp']             = new \stdClass();
 		$GLOBALS['wp']->query_vars = [];
 
 		$result = $this->module->restrict_unauthenticated_access( null );
 
 		$this->assertNull(
 			$result,
-			'restrict_unauthenticated_access() must handle missing rest_route gracefully.'
+			'restrict_unauthenticated_access() must handle missing rest_route query var gracefully.'
 		);
 	}
 
