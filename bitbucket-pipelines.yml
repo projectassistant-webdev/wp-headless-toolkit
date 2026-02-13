@@ -139,7 +139,7 @@ definitions:
 
           # Override dbHost for CI: Bitbucket services run at 127.0.0.1, not 'mysql'
           - cp codeception.dist.yml codeception.yml
-          - sed -i 's/dbHost:.*mysql/dbHost: 127.0.0.1/' codeception.yml
+          - "sed -i 's/dbHost:.*mysql/dbHost: 127.0.0.1/' codeception.yml"
 
           # Run Codeception WPUnit tests with fail-fast for quicker feedback
           - vendor/bin/codecept run wpunit --fail-fast
