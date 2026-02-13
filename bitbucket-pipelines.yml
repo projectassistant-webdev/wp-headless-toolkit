@@ -21,9 +21,10 @@ definitions:
         caches:
           - composer
         script:
+          - export COMPOSER_ALLOW_SUPERUSER=1
           - apt-get update && apt-get install -y --no-install-recommends git unzip zip
           - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-          - composer install --no-interaction --prefer-dist
+          - composer install --no-interaction --prefer-dist --ignore-platform-reqs
           - composer lint
 
     - step: &analyze
@@ -32,9 +33,10 @@ definitions:
         caches:
           - composer
         script:
+          - export COMPOSER_ALLOW_SUPERUSER=1
           - apt-get update && apt-get install -y --no-install-recommends git unzip zip
           - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-          - composer install --no-interaction --prefer-dist
+          - composer install --no-interaction --prefer-dist --ignore-platform-reqs
           - composer phpstan
 
     - step: &test
@@ -45,6 +47,7 @@ definitions:
         services:
           - mysql
         script:
+          - export COMPOSER_ALLOW_SUPERUSER=1
           # Install system dependencies
           - apt-get update && apt-get install -y --no-install-recommends
             git unzip zip less mariadb-client subversion
