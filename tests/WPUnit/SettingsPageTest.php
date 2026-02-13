@@ -145,7 +145,7 @@ class SettingsPageTest extends WPTestCase {
 
 		$statuses = $this->settings_page->get_module_statuses();
 
-		$this->assertCount( 5, $statuses, 'Should return data for all 5 registered modules' );
+		$this->assertCount( 6, $statuses, 'Should return data for all 6 registered modules' );
 	}
 
 	/**
@@ -534,7 +534,7 @@ class SettingsPageTest extends WPTestCase {
 		$main    = Main::instance();
 		$classes = $main->get_registered_module_classes();
 
-		$this->assertCount( 5, $classes, 'Should return all 5 registered module class names' );
+		$this->assertCount( 6, $classes, 'Should return all 6 registered module class names' );
 	}
 
 	/**
@@ -558,7 +558,7 @@ class SettingsPageTest extends WPTestCase {
 
 		$classes = $main->get_registered_module_classes();
 
-		$this->assertCount( 4, $classes, 'Filter should be able to remove modules from the list' );
+		$this->assertCount( 5, $classes, 'Filter should be able to remove modules from the list' );
 
 		// Verify HeadCleanup is not in the list.
 		foreach ( $classes as $class ) {
