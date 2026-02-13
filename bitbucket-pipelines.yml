@@ -1,0 +1,155 @@
+# Bitbucket Pipelines CI for WP Headless Toolkit
+# Runs PHPCS linting, PHPStan static analysis, and Codeception WPUnit tests
+# on pushes to staging/main and on pull requests.
+
+definitions:
+  caches:
+    composer:
+      key:
+        files:
+          - composer.lock
+      path: vendor
+
+  steps:
+    - step: &lint
+        name: "PHPCS Lint"
+        image: php:8.1-cli
+        caches:
+          - composer
+        script:
+          - apt-get update && apt-get install -y --no-install-recommends git unzip zip
+          - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+          - composer install --no-interaction --prefer-dist
+          - composer lint
+
+    - step: &analyze
+        name: "PHPStan Analysis"
+        image: php:8.1-cli
+        caches:
+          - composer
+        script:
+          - apt-get update && apt-get install -y --no-install-recommends git unzip zip
+          - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+          - composer install --no-interaction --prefer-dist
+          - composer phpstan
+
+    - step: &test
+        name: "WPUnit Tests"
+        image: php:8.1-cli
+        caches:
+          - composer
+        services:
+          - mysql
+        script:
+          # Install system dependencies
+          - apt-get update && apt-get install -y --no-install-recommends
+            git unzip zip less mariadb-client subversion
+            libpng-dev libjpeg-dev libfreetype6-dev libzip-dev
+          # Install PHP extensions required by WordPress
+          - docker-php-ext-configure gd --with-freetype --with-jpeg
+          - docker-php-ext-install mysqli pdo pdo_mysql gd zip
+
+          # Install Composer
+          - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+          - composer install --no-interaction --prefer-dist
+
+          # Install WP-CLI
+          - curl -o /usr/local/bin/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+          - chmod +x /usr/local/bin/wp
+
+          # Wait for MySQL to be ready
+          - |
+            for i in $(seq 1 30); do
+              if mysqladmin ping -h 127.0.0.1 -u root -proot --silent 2>/dev/null; then
+                echo "MySQL is ready (attempt $i)"
+                break
+              fi
+              echo "Waiting for MySQL (attempt $i/30)..."
+              sleep 2
+            done
+
+          # Download and install WordPress
+          - mkdir -p /var/www/html
+          - wp core download --path=/var/www/html --allow-root
+          - wp config create
+            --path=/var/www/html
+            --dbname=wordpress_test
+            --dbuser=root
+            --dbpass=root
+            --dbhost=127.0.0.1
+            --allow-root
+          - wp db create --path=/var/www/html --allow-root 2>/dev/null || true
+          - wp core install
+            --path=/var/www/html
+            --url=http://localhost
+            --title="WP Headless Toolkit CI"
+            --admin_user=admin
+            --admin_password=admin
+            --admin_email=admin@example.com
+            --skip-email
+            --allow-root
+
+          # Install and activate WPGraphQL
+          - wp plugin install wp-graphql --version=1.27.0 --activate --path=/var/www/html --allow-root
+
+          # Link our plugin into the WordPress plugins directory
+          - ln -s "$BITBUCKET_CLONE_DIR" /var/www/html/wp-content/plugins/wp-headless-toolkit
+          - wp plugin activate wp-headless-toolkit --path=/var/www/html --allow-root
+
+          # Download WordPress test library
+          - |
+            WP_VERSION=$(wp core version --path=/var/www/html --allow-root)
+            WP_TESTS_DIR=/tmp/wordpress-tests-lib
+            mkdir -p "$WP_TESTS_DIR"
+            svn co --quiet "https://develop.svn.wordpress.org/tags/${WP_VERSION}/tests/phpunit/includes/" "${WP_TESTS_DIR}/includes"
+            svn co --quiet "https://develop.svn.wordpress.org/tags/${WP_VERSION}/tests/phpunit/data/" "${WP_TESTS_DIR}/data"
+
+          # Create wp-tests-config.php
+          - |
+            cat > /tmp/wordpress-tests-lib/wp-tests-config.php <<'EOF'
+            <?php
+            define( 'ABSPATH', '/var/www/html/' );
+            define( 'DB_NAME', 'wordpress_test' );
+            define( 'DB_USER', 'root' );
+            define( 'DB_PASSWORD', 'root' );
+            define( 'DB_HOST', '127.0.0.1' );
+            define( 'DB_CHARSET', 'utf8' );
+            define( 'DB_COLLATE', '' );
+            define( 'WP_TESTS_DOMAIN', 'localhost' );
+            define( 'WP_TESTS_EMAIL', 'admin@example.com' );
+            define( 'WP_TESTS_TITLE', 'WP Headless Toolkit CI' );
+            define( 'WP_PHP_BINARY', 'php' );
+            $table_prefix = 'wptests_';
+            EOF
+
+          # Run Codeception WPUnit tests
+          - composer test
+
+  services:
+    mysql:
+      image: mysql:8.0
+      environment:
+        MYSQL_ROOT_PASSWORD: root
+        MYSQL_DATABASE: wordpress_test
+
+pipelines:
+  default:
+    - step: *lint
+    - step: *analyze
+    - step: *test
+
+  branches:
+    staging:
+      - step: *lint
+      - step: *analyze
+      - step: *test
+    main:
+      - step: *lint
+      - step: *analyze
+      - step: *test
+
+  pull-requests:
+    "**":
+      - step: *lint
+      - step: *analyze
+      - step: *test
