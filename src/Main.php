@@ -15,6 +15,7 @@ use ProjectAssistant\HeadlessToolkit\Modules\MigrateDbCompat\MigrateDbCompat;
 use ProjectAssistant\HeadlessToolkit\Admin\SettingsPage;
 use ProjectAssistant\HeadlessToolkit\Modules\HeadCleanup\HeadCleanup;
 use ProjectAssistant\HeadlessToolkit\Modules\GraphqlPerformance\GraphqlPerformance;
+use ProjectAssistant\HeadlessToolkit\Modules\Cors\Cors;
 
 if ( ! class_exists( 'ProjectAssistant\HeadlessToolkit\Main' ) ) :
 
@@ -117,6 +118,7 @@ if ( ! class_exists( 'ProjectAssistant\HeadlessToolkit\Main' ) ) :
 				MigrateDbCompat::class,
 				HeadCleanup::class,
 				GraphqlPerformance::class,
+				Cors::class,
 			];
 		}
 
