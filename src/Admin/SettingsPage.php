@@ -189,6 +189,14 @@ class SettingsPage {
 				'description' => 'Disable head cleanup module',
 			],
 			[
+				'key'         => 'WP_HEADLESS_PREVIEW_TOKEN_EXPIRY',
+				'description' => 'Preview token expiry in seconds (default: 300)',
+			],
+			[
+				'key'         => 'WP_HEADLESS_DISABLE_PREVIEW_MODE',
+				'description' => 'Disable preview mode module',
+			],
+			[
 				'key'         => 'WP_HEADLESS_DISABLE_CORS',
 				'description' => 'Disable CORS module (Phase 2)',
 			],
