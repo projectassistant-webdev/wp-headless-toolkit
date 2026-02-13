@@ -135,6 +135,10 @@ definitions:
             define( 'WP_TESTS_TITLE', 'WP Headless Toolkit CI' );
             define( 'WP_PHP_BINARY', 'php' );
             $table_prefix = 'wptests_';
+            // Prevent "Undefined array key REQUEST_URI" fatal during WP cron shutdown.
+            if ( ! isset( $_SERVER['REQUEST_URI'] ) ) {
+                $_SERVER['REQUEST_URI'] = '/';
+            }
             WPCONFIG
 
           # Override dbHost for CI: Bitbucket services run at 127.0.0.1, not 'mysql'
