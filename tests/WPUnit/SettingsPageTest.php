@@ -51,6 +51,12 @@ class SettingsPageTest extends WPTestCase {
 		// Remove filters used in tests.
 		remove_all_filters( 'wp_headless_module_classes' );
 		remove_all_filters( 'wp_headless_module_enabled' );
+		remove_all_filters( 'wp_die_handler' );
+		remove_all_filters( 'wp_die_ajax_handler' );
+		remove_all_filters( 'wp_die_json_handler' );
+		remove_all_filters( 'wp_die_jsonp_handler' );
+		remove_all_filters( 'wp_die_xmlrpc_handler' );
+		remove_all_filters( 'wp_die_xml_handler' );
 
 		parent::tear_down();
 	}
@@ -547,11 +553,38 @@ class SettingsPageTest extends WPTestCase {
 	 *
 	 * A subscriber or editor should not be able to render the settings page.
 	 * The method must call wp_die() for unauthorized users.
+	 *
+	 * Note: We explicitly override the wp_die_handler to guarantee that
+	 * \WPDieException is thrown. When running the full test suite, preceding
+	 * test classes can corrupt the global wp_die handler, causing wp_die() to
+	 * terminate the PHP process instead of throwing the exception.
 	 */
 	public function test_render_page_blocks_unauthorized_users(): void {
 		// Create a subscriber (no manage_options capability).
 		$subscriber_id = self::factory()->user->create( [ 'role' => 'subscriber' ] );
 		wp_set_current_user( $subscriber_id );
+
+		// Override ALL wp_die handlers at maximum priority to ensure WPDieException
+		// is thrown even if a preceding test class corrupted the global handler.
+		// We must cover wp_die_handler, wp_die_ajax_handler, and wp_die_json_handler
+		// since preceding tests may set DOING_AJAX or similar globals.
+		$die_handler = function () {
+			return function ( $message, $title = '', $args = array() ) {
+				if ( is_int( $args ) ) {
+					$args = array( 'response' => $args );
+				}
+				$defaults = array( 'response' => 500 );
+				$args     = wp_parse_args( $args, $defaults );
+				throw new \WPDieException( $message );
+			};
+		};
+
+		add_filter( 'wp_die_handler', $die_handler, PHP_INT_MAX );
+		add_filter( 'wp_die_ajax_handler', $die_handler, PHP_INT_MAX );
+		add_filter( 'wp_die_json_handler', $die_handler, PHP_INT_MAX );
+		add_filter( 'wp_die_jsonp_handler', $die_handler, PHP_INT_MAX );
+		add_filter( 'wp_die_xmlrpc_handler', $die_handler, PHP_INT_MAX );
+		add_filter( 'wp_die_xml_handler', $die_handler, PHP_INT_MAX );
 
 		$this->expectException( \WPDieException::class );
 
