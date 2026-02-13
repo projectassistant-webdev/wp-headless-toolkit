@@ -141,11 +141,8 @@ definitions:
           - cp codeception.dist.yml codeception.yml
           - "sed -i 's/dbHost:.*mysql/dbHost: 127.0.0.1/' codeception.yml"
 
-          # Run Codeception WPUnit tests with fail-fast for quicker feedback.
-          # Set REQUEST_URI via auto_prepend to prevent WP cron shutdown fatal.
-          - |
-            echo '<?php $_SERVER["REQUEST_URI"] = "/";' > /tmp/ci-server-vars.php
-            php -d auto_prepend_file=/tmp/ci-server-vars.php vendor/bin/codecept run wpunit --fail-fast
+          # Run Codeception WPUnit tests with fail-fast for quicker feedback
+          - vendor/bin/codecept run wpunit --fail-fast
 
     - step: &create-release-tag
         name: "Create Release Tag"

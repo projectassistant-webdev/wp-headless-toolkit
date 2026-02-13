@@ -8,6 +8,11 @@
  * @package Tests\ProjectAssistant\HeadlessToolkit
  */
 
+// Prevent WP cron shutdown fatal: $_SERVER['REQUEST_URI'] is undefined in CLI.
+if ( ! isset( $_SERVER['REQUEST_URI'] ) ) {
+	$_SERVER['REQUEST_URI'] = '/';
+}
+
 // Ensure the plugin's access functions are available.
 require_once dirname( __DIR__, 2 ) . '/access-functions.php';
 
