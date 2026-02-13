@@ -136,7 +136,7 @@ class ComposerCiTest extends WPTestCase {
 	 */
 	public function test_plugin_version_constant_defined(): void {
 		$this->assertTrue( defined( 'WP_HEADLESS_VERSION' ) );
-		$this->assertSame( '1.0.0', WP_HEADLESS_VERSION );
+		$this->assertSame( '1.3.0', WP_HEADLESS_VERSION );
 	}
 
 	/**
