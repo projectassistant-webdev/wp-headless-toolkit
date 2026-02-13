@@ -5,7 +5,7 @@
  * Description: Unified headless WordPress plugin for Next.js projects - ISR revalidation, REST security, CORS, preview mode, and more.
  * Author: Project Assistant
  * Author URI: https://projectassistant.org
- * Version: 1.0.0
+ * Version: 1.3.0
  * Text Domain: wp-headless-toolkit
  * Domain Path: /languages
  * Requires at least: 6.4
@@ -19,7 +19,7 @@
  * @package ProjectAssistant\HeadlessToolkit
  * @author Project Assistant
  * @license GPL-3
- * @version 1.0.0
+ * @version 1.3.0
  */
 
 // Exit if accessed directly.
@@ -50,7 +50,7 @@ if ( file_exists( __DIR__ . '/deactivation.php' ) ) {
 function wp_headless_constants(): void {
 	// Plugin version.
 	if ( ! defined( 'WP_HEADLESS_VERSION' ) ) {
-		define( 'WP_HEADLESS_VERSION', '1.0.0' );
+		define( 'WP_HEADLESS_VERSION', '1.3.0' );
 	}
 
 	// Plugin Folder Path.
