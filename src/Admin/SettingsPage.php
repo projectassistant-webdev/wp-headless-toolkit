@@ -44,6 +44,13 @@ class SettingsPage {
 	 * Render the settings page HTML.
 	 */
 	public function render_page(): void {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die(
+				esc_html__( 'You do not have sufficient permissions to access this page.', 'wp-headless-toolkit' ),
+				403
+			);
+		}
+
 		$module_statuses = $this->get_module_statuses();
 		$env_config      = $this->get_env_config();
 		$version         = $this->get_plugin_version();

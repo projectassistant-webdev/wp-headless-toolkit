@@ -121,6 +121,10 @@ class RestSecurity implements ModuleInterface {
 			}
 		}
 
-		return $result;
+		return new \WP_Error(
+			'rest_not_logged_in',
+			esc_html__( 'REST API restricted to authenticated users.', 'wp-headless-toolkit' ),
+			[ 'status' => 401 ]
+		);
 	}
 }

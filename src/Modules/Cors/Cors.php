@@ -168,7 +168,13 @@ class Cors implements ModuleInterface {
 	 * @return string The origin or empty string if not present.
 	 */
 	public function get_request_origin(): string {
-		return $_SERVER['HTTP_ORIGIN'] ?? '';
+		$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+
+		if ( '' === $origin ) {
+			return '';
+		}
+
+		return esc_url_raw( wp_unslash( $origin ) );
 	}
 
 	/**
@@ -257,7 +263,7 @@ class Cors implements ModuleInterface {
 	 * @return bool
 	 */
 	private function is_api_request(): bool {
-		$request_uri = $_SERVER['REQUEST_URI'] ?? '';
+		$request_uri = sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) );
 
 		// Check for REST API.
 		$rest_prefix = rest_get_url_prefix();

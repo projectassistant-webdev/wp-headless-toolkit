@@ -175,12 +175,12 @@ class MainTest extends WPTestCase {
 	}
 
 	/**
-	 * Test that wp_headless_init action fires on EVERY call to instance(), not just the first.
+	 * Test that wp_headless_init fires only once (inside singleton guard).
 	 *
-	 * Per M-2 note: The current Main::instance() fires do_action('wp_headless_init')
-	 * outside the singleton guard, so it fires on every call.
+	 * After TD-QA-004 fix: do_action('wp_headless_init') is moved inside the
+	 * singleton if-block so it fires only on first instantiation.
 	 */
-	public function test_wp_headless_init_action_fires_on_every_instance_call(): void {
+	public function test_wp_headless_init_fires_only_once(): void {
 		$fire_count = 0;
 		add_action(
 			'wp_headless_init',
@@ -193,7 +193,24 @@ class MainTest extends WPTestCase {
 		Main::instance();
 		Main::instance();
 
-		$this->assertSame( 3, $fire_count, 'wp_headless_init must fire on every instance() call (3 calls = 3 fires).' );
+		$this->assertSame( 1, $fire_count, 'wp_headless_init must fire only once (on first instance() call).' );
+	}
+
+	/**
+	 * Test that wp_headless_init passes the Main instance parameter.
+	 */
+	public function test_wp_headless_init_receives_instance_parameter(): void {
+		$received = null;
+		add_action(
+			'wp_headless_init',
+			static function ( $instance ) use ( &$received ): void {
+				$received = $instance;
+			}
+		);
+
+		$instance = Main::instance();
+
+		$this->assertSame( $instance, $received, 'wp_headless_init must pass the Main instance as parameter.' );
 	}
 
 	/**

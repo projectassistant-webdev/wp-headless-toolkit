@@ -468,17 +468,53 @@ class RestSecurityTest extends WPTestCase {
 	}
 
 	/**
-	 * Test that restrict returns null for non-allowed routes (current pass-through behavior).
+	 * Test that restrict returns WP_Error for non-allowed routes.
 	 */
-	public function test_restrict_returns_null_for_non_allowed_route(): void {
+	public function test_restrict_returns_wp_error_for_non_allowed_route(): void {
 		$GLOBALS['wp']->query_vars['rest_route'] = '/wp/v2/posts';
 
 		$result = $this->module->restrict_unauthenticated_access( null );
 
-		$this->assertNull(
+		$this->assertInstanceOf(
+			\WP_Error::class,
 			$result,
-			'restrict_unauthenticated_access() must return null for non-allowed routes (current pass-through implementation).'
+			'restrict_unauthenticated_access() must return WP_Error for non-allowed routes.'
 		);
+		$this->assertSame(
+			'rest_not_logged_in',
+			$result->get_error_code(),
+			'WP_Error must use "rest_not_logged_in" error code.'
+		);
+	}
+
+	/**
+	 * Test that restrict returns WP_Error for unknown custom routes.
+	 */
+	public function test_restrict_returns_wp_error_for_unknown_route(): void {
+		$GLOBALS['wp']->query_vars['rest_route'] = '/custom/v9/anything';
+
+		$result = $this->module->restrict_unauthenticated_access( null );
+
+		$this->assertInstanceOf(
+			\WP_Error::class,
+			$result,
+			'restrict_unauthenticated_access() must return WP_Error for unknown custom routes.'
+		);
+	}
+
+	/**
+	 * Test that restrict WP_Error has correct HTTP 401 status code.
+	 */
+	public function test_restrict_wp_error_has_correct_status_code(): void {
+		$GLOBALS['wp']->query_vars['rest_route'] = '/wp/v2/posts';
+
+		$result = $this->module->restrict_unauthenticated_access( null );
+
+		$this->assertInstanceOf( \WP_Error::class, $result );
+		$error_data = $result->get_error_data( 'rest_not_logged_in' );
+		$this->assertIsArray( $error_data, 'WP_Error data must be an array.' );
+		$this->assertArrayHasKey( 'status', $error_data, 'WP_Error data must contain "status" key.' );
+		$this->assertSame( 401, $error_data['status'], 'WP_Error status must be 401.' );
 	}
 
 	/**
@@ -508,7 +544,8 @@ class RestSecurityTest extends WPTestCase {
 	 *
 	 * When $GLOBALS['wp']->query_vars exists but has no 'rest_route' key,
 	 * the implementation uses the null coalescing operator (??) to default
-	 * to an empty string, so no route matches any allowed prefix.
+	 * to an empty string, so no route matches any allowed prefix and
+	 * access is denied with WP_Error.
 	 */
 	public function test_restrict_handles_missing_rest_route_query_var(): void {
 		// Ensure $GLOBALS['wp'] exists but has no rest_route key.
@@ -517,9 +554,10 @@ class RestSecurityTest extends WPTestCase {
 
 		$result = $this->module->restrict_unauthenticated_access( null );
 
-		$this->assertNull(
+		$this->assertInstanceOf(
+			\WP_Error::class,
 			$result,
-			'restrict_unauthenticated_access() must handle missing rest_route query var gracefully.'
+			'restrict_unauthenticated_access() must return WP_Error when rest_route is missing (no allowed prefix matches).'
 		);
 	}
 
@@ -538,9 +576,10 @@ class RestSecurityTest extends WPTestCase {
 
 		$result = $this->module->restrict_unauthenticated_access( null );
 
-		$this->assertNull(
+		$this->assertInstanceOf(
+			\WP_Error::class,
 			$result,
-			'restrict_unauthenticated_access() must return $result when allowed_prefixes is empty (pass-through behavior).'
+			'restrict_unauthenticated_access() must return WP_Error when allowed_prefixes is empty (no match possible).'
 		);
 	}
 }
