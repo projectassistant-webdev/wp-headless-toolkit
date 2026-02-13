@@ -135,15 +135,14 @@ definitions:
             define( 'WP_TESTS_TITLE', 'WP Headless Toolkit CI' );
             define( 'WP_PHP_BINARY', 'php' );
             $table_prefix = 'wptests_';
-            // Prevent "Undefined array key REQUEST_URI" fatal during WP cron shutdown.
-            if ( ! isset( $_SERVER['REQUEST_URI'] ) ) {
-                $_SERVER['REQUEST_URI'] = '/';
-            }
             WPCONFIG
 
           # Override dbHost for CI: Bitbucket services run at 127.0.0.1, not 'mysql'
           - cp codeception.dist.yml codeception.yml
           - "sed -i 's/dbHost:.*mysql/dbHost: 127.0.0.1/' codeception.yml"
+
+          # Prevent WP cron shutdown fatal: $_SERVER['REQUEST_URI'] undefined in CLI.
+          - export REQUEST_URI=/
 
           # Run Codeception WPUnit tests with fail-fast for quicker feedback
           - vendor/bin/codecept run wpunit --fail-fast
