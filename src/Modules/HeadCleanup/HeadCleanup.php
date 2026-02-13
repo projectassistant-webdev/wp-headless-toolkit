@@ -56,8 +56,11 @@ class HeadCleanup implements ModuleInterface {
 		// Remove REST API link from head (still accessible via endpoint).
 		remove_action( 'wp_head', 'rest_output_link_wp_head' );
 
-		// Remove oEmbed discovery links.
-		remove_action( 'wp_head', 'wp_oembed_add_discovery_links' );
+		// Remove oEmbed discovery links (priority varies by WordPress version).
+		$oembed_priority = has_action( 'wp_head', 'wp_oembed_add_discovery_links' );
+		if ( false !== $oembed_priority ) {
+			remove_action( 'wp_head', 'wp_oembed_add_discovery_links', $oembed_priority );
+		}
 
 		// Remove emoji scripts and styles.
 		remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
