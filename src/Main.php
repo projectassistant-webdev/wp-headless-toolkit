@@ -14,6 +14,7 @@ use ProjectAssistant\HeadlessToolkit\Modules\FrontendRedirect\FrontendRedirect;
 use ProjectAssistant\HeadlessToolkit\Modules\MigrateDbCompat\MigrateDbCompat;
 use ProjectAssistant\HeadlessToolkit\Admin\SettingsPage;
 use ProjectAssistant\HeadlessToolkit\Modules\HeadCleanup\HeadCleanup;
+use ProjectAssistant\HeadlessToolkit\Modules\GraphqlPerformance\GraphqlPerformance;
 
 if ( ! class_exists( 'ProjectAssistant\HeadlessToolkit\Main' ) ) :
 
@@ -115,6 +116,7 @@ if ( ! class_exists( 'ProjectAssistant\HeadlessToolkit\Main' ) ) :
 				FrontendRedirect::class,
 				MigrateDbCompat::class,
 				HeadCleanup::class,
+				GraphqlPerformance::class,
 			];
 		}
 
