@@ -1,4 +1,4 @@
-<?php  //[STAMP] b97a78df80ae068308dc87d93e7a4ef1
+<?php  //[STAMP] 57aac8321bd9894d7d0d15637eda1d17
 // phpcs:ignoreFile
 namespace Tests\ProjectAssistant\HeadlessToolkit\_generated;
 
