@@ -1,0 +1,87 @@
+<?php
+
+/**
+ * PHPStan stub for WP_Taxonomy.
+ */
+class WP_Taxonomy {
+	/** @var string */
+	public $name;
+
+	/** @var string */
+	public $label;
+
+	/** @var object */
+	public $labels;
+
+	/** @var string */
+	public $description;
+
+	/** @var bool */
+	public $public;
+
+	/** @var bool */
+	public $publicly_queryable;
+
+	/** @var bool */
+	public $hierarchical;
+
+	/** @var bool */
+	public $show_ui;
+
+	/** @var bool */
+	public $show_in_menu;
+
+	/** @var bool */
+	public $show_in_nav_menus;
+
+	/** @var bool */
+	public $show_tagcloud;
+
+	/** @var bool */
+	public $show_in_quick_edit;
+
+	/** @var bool */
+	public $show_admin_column;
+
+	/** @var bool */
+	public $show_in_rest;
+
+	/** @var string */
+	public $rest_base;
+
+	/** @var string */
+	public $rest_namespace;
+
+	/** @var string */
+	public $rest_controller_class;
+
+	/** @var object */
+	public $cap;
+
+	/** @var array|false */
+	public $rewrite;
+
+	/** @var string|bool */
+	public $query_var;
+
+	/** @var callable */
+	public $update_count_callback;
+
+	/** @var callable */
+	public $meta_box_cb;
+
+	/** @var callable */
+	public $meta_box_sanitize_cb;
+
+	/** @var string[] */
+	public $object_type;
+
+	/** @var bool */
+	public $_builtin;
+
+	/** @var array */
+	public $args;
+
+	/** @var string */
+	public $sort;
+}

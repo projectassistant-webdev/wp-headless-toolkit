@@ -12,6 +12,7 @@ use ProjectAssistant\HeadlessToolkit\Modules\Revalidation\Revalidation;
 use ProjectAssistant\HeadlessToolkit\Modules\RestSecurity\RestSecurity;
 use ProjectAssistant\HeadlessToolkit\Modules\FrontendRedirect\FrontendRedirect;
 use ProjectAssistant\HeadlessToolkit\Modules\MigrateDbCompat\MigrateDbCompat;
+use ProjectAssistant\HeadlessToolkit\Admin\SettingsPage;
 use ProjectAssistant\HeadlessToolkit\Modules\HeadCleanup\HeadCleanup;
 
 if ( ! class_exists( 'ProjectAssistant\HeadlessToolkit\Main' ) ) :
@@ -40,11 +41,12 @@ if ( ! class_exists( 'ProjectAssistant\HeadlessToolkit\Main' ) ) :
 		public static function instance(): self {
 			if ( ! isset( self::$instance ) || ! ( is_a( self::$instance, self::class ) ) ) {
 				if ( ! function_exists( 'is_plugin_active' ) ) {
-					require_once ABSPATH . 'wp-admin/includes/plugin.php'; // @phpstan-ignore requireOnce.fileNotFound
+					require_once ABSPATH . 'wp-admin/includes/plugin.php';
 				}
 				self::$instance = new self();
 				self::$instance->includes();
 				self::$instance->load_modules();
+				self::$instance->load_admin();
 			}
 
 			/**
@@ -63,7 +65,7 @@ if ( ! class_exists( 'ProjectAssistant\HeadlessToolkit\Main' ) ) :
 		 * @codeCoverageIgnore
 		 */
 		private function includes(): void {
-			if ( defined( 'WP_HEADLESS_AUTOLOAD' ) && false !== WP_HEADLESS_AUTOLOAD && defined( 'WP_HEADLESS_PLUGIN_DIR' ) ) {
+			if ( defined( 'WP_HEADLESS_AUTOLOAD' ) && false !== WP_HEADLESS_AUTOLOAD && defined( 'WP_HEADLESS_PLUGIN_DIR' ) ) { // @phpstan-ignore notIdentical.alwaysTrue
 				require_once WP_HEADLESS_PLUGIN_DIR . 'vendor/autoload.php';
 			}
 		}
@@ -134,6 +136,28 @@ if ( ! class_exists( 'ProjectAssistant\HeadlessToolkit\Main' ) ) :
 		 */
 		public function get_modules(): array {
 			return $this->modules;
+		}
+
+		/**
+		 * Get all registered module classes (including those that may be disabled).
+		 *
+		 * Returns the full list of module classes after filter application,
+		 * regardless of whether each module is currently enabled.
+		 *
+		 * @return string[]
+		 */
+		public function get_registered_module_classes(): array {
+			return apply_filters( 'wp_headless_module_classes', $this->get_default_modules() );
+		}
+
+		/**
+		 * Load admin-only components.
+		 */
+		private function load_admin(): void {
+			if ( is_admin() ) {
+				$settings_page = new SettingsPage();
+				$settings_page->init();
+			}
 		}
 
 		/**
