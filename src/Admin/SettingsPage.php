@@ -193,6 +193,10 @@ class SettingsPage {
 				'description' => 'Disable CORS module (Phase 2)',
 			],
 			[
+				'key'         => 'WP_HEADLESS_ENABLE_SECURITY_HEADERS',
+				'description' => 'Enable security headers module (disabled by default)',
+			],
+			[
 				'key'         => 'WP_HEADLESS_DISABLE_SECURITY_HEADERS',
 				'description' => 'Disable security headers module (Phase 2)',
 			],

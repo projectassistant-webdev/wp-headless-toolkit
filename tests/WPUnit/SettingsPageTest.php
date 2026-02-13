@@ -145,7 +145,7 @@ class SettingsPageTest extends WPTestCase {
 
 		$statuses = $this->settings_page->get_module_statuses();
 
-		$this->assertCount( 7, $statuses, 'Should return data for all 7 registered modules' );
+		$this->assertCount( 8, $statuses, 'Should return data for all 8 registered modules' );
 	}
 
 	/**
@@ -266,6 +266,7 @@ class SettingsPageTest extends WPTestCase {
 			'WP_HEADLESS_DISABLE_MIGRATE_DB_COMPAT',
 			'WP_HEADLESS_DISABLE_HEAD_CLEANUP',
 			'WP_HEADLESS_DISABLE_CORS',
+			'WP_HEADLESS_ENABLE_SECURITY_HEADERS',
 			'WP_HEADLESS_DISABLE_SECURITY_HEADERS',
 		];
 
@@ -273,7 +274,7 @@ class SettingsPageTest extends WPTestCase {
 			$this->assertContains( $expected_key, $keys, "Expected env var {$expected_key} should be in the config" );
 		}
 
-		$this->assertCount( 12, $config, 'Should return 12 documented environment variables' );
+		$this->assertCount( 13, $config, 'Should return 13 documented environment variables' );
 	}
 
 	/**
@@ -534,7 +535,7 @@ class SettingsPageTest extends WPTestCase {
 		$main    = Main::instance();
 		$classes = $main->get_registered_module_classes();
 
-		$this->assertCount( 7, $classes, 'Should return all 7 registered module class names' );
+		$this->assertCount( 8, $classes, 'Should return all 8 registered module class names' );
 	}
 
 	/**
@@ -558,7 +559,7 @@ class SettingsPageTest extends WPTestCase {
 
 		$classes = $main->get_registered_module_classes();
 
-		$this->assertCount( 6, $classes, 'Filter should be able to remove modules from the list' );
+		$this->assertCount( 7, $classes, 'Filter should be able to remove modules from the list' );
 
 		// Verify HeadCleanup is not in the list.
 		foreach ( $classes as $class ) {
