@@ -16,6 +16,7 @@ use ProjectAssistant\HeadlessToolkit\Admin\SettingsPage;
 use ProjectAssistant\HeadlessToolkit\Modules\HeadCleanup\HeadCleanup;
 use ProjectAssistant\HeadlessToolkit\Modules\GraphqlPerformance\GraphqlPerformance;
 use ProjectAssistant\HeadlessToolkit\Modules\Cors\Cors;
+use ProjectAssistant\HeadlessToolkit\Modules\SecurityHeaders\SecurityHeaders;
 
 if ( ! class_exists( 'ProjectAssistant\HeadlessToolkit\Main' ) ) :
 
@@ -119,6 +120,7 @@ if ( ! class_exists( 'ProjectAssistant\HeadlessToolkit\Main' ) ) :
 				HeadCleanup::class,
 				GraphqlPerformance::class,
 				Cors::class,
+				SecurityHeaders::class,
 			];
 		}
 
