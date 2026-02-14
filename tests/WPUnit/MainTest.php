@@ -7,7 +7,7 @@
 
 namespace Tests\ProjectAssistant\HeadlessToolkit\WPUnit;
 
-use lucatume\WPBrowser\TestCase\WPTestCase;
+use Tests\ProjectAssistant\HeadlessToolkit\HeadlessToolkitTestCase;
 use ProjectAssistant\HeadlessToolkit\Main;
 use ProjectAssistant\HeadlessToolkit\Modules\ModuleInterface;
 use ProjectAssistant\HeadlessToolkit\Modules\MigrateDbCompat\MigrateDbCompat;
@@ -15,7 +15,18 @@ use ProjectAssistant\HeadlessToolkit\Modules\MigrateDbCompat\MigrateDbCompat;
 /**
  * Tests for the Main singleton and module loader.
  */
-class MainTest extends WPTestCase {
+class MainTest extends HeadlessToolkitTestCase {
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected function get_filters_to_clean(): array {
+		return [
+			'wp_headless_module_classes',
+			'wp_headless_init',
+			'wp_headless_modules_loaded',
+		];
+	}
 
 	/**
 	 * Reset the Main singleton between tests to prevent state leakage.
@@ -25,11 +36,6 @@ class MainTest extends WPTestCase {
 		$instance_prop  = $reflection->getProperty( 'instance' );
 		$instance_prop->setAccessible( true );
 		$instance_prop->setValue( null, null );
-
-		// Remove any test filters added during tests.
-		remove_all_filters( 'wp_headless_module_classes' );
-		remove_all_filters( 'wp_headless_init' );
-		remove_all_filters( 'wp_headless_modules_loaded' );
 
 		parent::tear_down();
 	}

@@ -7,12 +7,12 @@
 
 namespace Tests\ProjectAssistant\HeadlessToolkit\WPUnit;
 
-use lucatume\WPBrowser\TestCase\WPTestCase;
+use Tests\ProjectAssistant\HeadlessToolkit\HeadlessToolkitTestCase;
 
 /**
  * Tests for plugin activation and deactivation callbacks.
  */
-class ActivationTest extends WPTestCase {
+class ActivationTest extends HeadlessToolkitTestCase {
 
 	/**
 	 * Set up test fixtures.

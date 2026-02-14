@@ -7,14 +7,14 @@
 
 namespace Tests\ProjectAssistant\HeadlessToolkit\WPUnit;
 
-use lucatume\WPBrowser\TestCase\WPTestCase;
+use Tests\ProjectAssistant\HeadlessToolkit\HeadlessToolkitTestCase;
 use ProjectAssistant\HeadlessToolkit\Modules\Cors\Cors;
 use ProjectAssistant\HeadlessToolkit\Modules\ModuleInterface;
 
 /**
  * Tests for the CORS module.
  */
-class CorsTest extends WPTestCase {
+class CorsTest extends HeadlessToolkitTestCase {
 
 	/**
 	 * The module instance under test.
@@ -22,13 +22,6 @@ class CorsTest extends WPTestCase {
 	 * @var Cors
 	 */
 	private Cors $module;
-
-	/**
-	 * Environment variables to clean up in tear_down.
-	 *
-	 * @var string[]
-	 */
-	private array $env_vars_to_clean = [];
 
 	/**
 	 * Set up test environment.
@@ -39,36 +32,19 @@ class CorsTest extends WPTestCase {
 	}
 
 	/**
-	 * Clean up filters and env vars after each test.
+	 * {@inheritDoc}
 	 */
-	protected function tear_down(): void {
-		// Clean up env vars.
-		foreach ( $this->env_vars_to_clean as $key ) {
-			putenv( $key );
-		}
-		$this->env_vars_to_clean = [];
-
-		remove_all_filters( 'wp_headless_module_enabled' );
-		remove_all_filters( 'wp_headless_cors_origin_allowed' );
-		remove_all_filters( 'wp_headless_cors_allowed_methods' );
-		remove_all_filters( 'wp_headless_cors_allowed_headers' );
-		remove_all_filters( 'wp_headless_cors_graphql_headers' );
-		remove_all_filters( 'wp_headless_config_value' );
-		remove_all_filters( 'rest_pre_serve_request' );
-		remove_all_filters( 'graphql_response_headers_to_send' );
-
-		parent::tear_down();
-	}
-
-	/**
-	 * Helper to set an env var and register it for cleanup.
-	 *
-	 * @param string $key   The env var name.
-	 * @param string $value The env var value.
-	 */
-	private function set_env( string $key, string $value ): void {
-		putenv( "{$key}={$value}" );
-		$this->env_vars_to_clean[] = $key;
+	protected function get_filters_to_clean(): array {
+		return [
+			'wp_headless_module_enabled',
+			'wp_headless_cors_origin_allowed',
+			'wp_headless_cors_allowed_methods',
+			'wp_headless_cors_allowed_headers',
+			'wp_headless_cors_graphql_headers',
+			'wp_headless_config_value',
+			'rest_pre_serve_request',
+			'graphql_response_headers_to_send',
+		];
 	}
 
 	// -------------------------------------------------------------------------

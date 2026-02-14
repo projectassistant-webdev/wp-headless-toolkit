@@ -7,24 +7,24 @@
 
 namespace Tests\ProjectAssistant\HeadlessToolkit\WPUnit;
 
-use lucatume\WPBrowser\TestCase\WPTestCase;
+use Tests\ProjectAssistant\HeadlessToolkit\HeadlessToolkitTestCase;
 use ProjectAssistant\HeadlessToolkit\Modules\MigrateDbCompat\MigrateDbCompat;
 
 /**
  * Tests for the MigrateDbCompat module.
  */
-class MigrateDbCompatTest extends WPTestCase {
+class MigrateDbCompatTest extends HeadlessToolkitTestCase {
 
 	/**
-	 * Clean up filters after each test.
+	 * {@inheritDoc}
 	 */
-	protected function tear_down(): void {
-		remove_all_filters( 'wpmdb_upload_dir' );
-		remove_all_filters( 'wpmdb_upload_info' );
-		remove_all_filters( 'wpmdb_get_path' );
-		remove_all_filters( 'wp_headless_module_enabled' );
-
-		parent::tear_down();
+	protected function get_filters_to_clean(): array {
+		return [
+			'wpmdb_upload_dir',
+			'wpmdb_upload_info',
+			'wpmdb_get_path',
+			'wp_headless_module_enabled',
+		];
 	}
 
 	/**

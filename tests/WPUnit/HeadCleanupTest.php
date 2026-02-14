@@ -7,13 +7,13 @@
 
 namespace Tests\ProjectAssistant\HeadlessToolkit\WPUnit;
 
-use lucatume\WPBrowser\TestCase\WPTestCase;
+use Tests\ProjectAssistant\HeadlessToolkit\HeadlessToolkitTestCase;
 use ProjectAssistant\HeadlessToolkit\Modules\HeadCleanup\HeadCleanup;
 
 /**
  * Tests for the HeadCleanup module.
  */
-class HeadCleanupTest extends WPTestCase {
+class HeadCleanupTest extends HeadlessToolkitTestCase {
 
 	/**
 	 * The module instance under test.
@@ -36,13 +36,19 @@ class HeadCleanupTest extends WPTestCase {
 	}
 
 	/**
-	 * Clean up filters after each test.
+	 * {@inheritDoc}
+	 */
+	protected function get_filters_to_clean(): array {
+		return [
+			'wp_headless_module_enabled',
+			'wp_headless_head_cleanup_removals',
+		];
+	}
+
+	/**
+	 * Clean up and restore defaults after each test.
 	 */
 	protected function tear_down(): void {
-		// Remove filters used in tests.
-		remove_all_filters( 'wp_headless_module_enabled' );
-		remove_all_filters( 'wp_headless_head_cleanup_removals' );
-
 		// Re-add default head actions so subsequent tests have a clean baseline.
 		$this->ensure_default_head_actions();
 

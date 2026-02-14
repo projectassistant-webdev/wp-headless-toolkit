@@ -7,13 +7,13 @@
 
 namespace Tests\ProjectAssistant\HeadlessToolkit\WPUnit;
 
-use lucatume\WPBrowser\TestCase\WPTestCase;
+use Tests\ProjectAssistant\HeadlessToolkit\HeadlessToolkitTestCase;
 use ProjectAssistant\HeadlessToolkit\Modules\RestSecurity\RestSecurity;
 
 /**
  * Tests for the RestSecurity module.
  */
-class RestSecurityTest extends WPTestCase {
+class RestSecurityTest extends HeadlessToolkitTestCase {
 
 	/**
 	 * The module instance under test.
@@ -47,7 +47,20 @@ class RestSecurityTest extends WPTestCase {
 	}
 
 	/**
-	 * Clean up filters and globals after each test.
+	 * {@inheritDoc}
+	 */
+	protected function get_filters_to_clean(): array {
+		return [
+			'wp_headless_module_enabled',
+			'wp_headless_rest_blocked_prefixes',
+			'wp_headless_rest_allowed_prefixes',
+			'rest_endpoints',
+			'rest_authentication_errors',
+		];
+	}
+
+	/**
+	 * Clean up globals after each test.
 	 */
 	protected function tear_down(): void {
 		// Restore the original $GLOBALS['wp'].
@@ -59,13 +72,6 @@ class RestSecurityTest extends WPTestCase {
 
 		// Reset current user.
 		wp_set_current_user( 0 );
-
-		// Remove all filters used in tests.
-		remove_all_filters( 'wp_headless_module_enabled' );
-		remove_all_filters( 'wp_headless_rest_blocked_prefixes' );
-		remove_all_filters( 'wp_headless_rest_allowed_prefixes' );
-		remove_all_filters( 'rest_endpoints' );
-		remove_all_filters( 'rest_authentication_errors' );
 
 		parent::tear_down();
 	}

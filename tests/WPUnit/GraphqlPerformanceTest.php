@@ -7,14 +7,14 @@
 
 namespace Tests\ProjectAssistant\HeadlessToolkit\WPUnit;
 
-use lucatume\WPBrowser\TestCase\WPTestCase;
+use Tests\ProjectAssistant\HeadlessToolkit\HeadlessToolkitTestCase;
 use ProjectAssistant\HeadlessToolkit\Modules\GraphqlPerformance\GraphqlPerformance;
 use ProjectAssistant\HeadlessToolkit\Modules\ModuleInterface;
 
 /**
  * Tests for the GraphqlPerformance module.
  */
-class GraphqlPerformanceTest extends WPTestCase {
+class GraphqlPerformanceTest extends HeadlessToolkitTestCase {
 
 	/**
 	 * The module instance under test.
@@ -32,17 +32,17 @@ class GraphqlPerformanceTest extends WPTestCase {
 	}
 
 	/**
-	 * Clean up filters after each test.
+	 * {@inheritDoc}
 	 */
-	protected function tear_down(): void {
-		remove_all_filters( 'wp_headless_module_enabled' );
-		remove_all_filters( 'wp_headless_graphql_cache_headers' );
-		remove_all_filters( 'wp_headless_graphql_complexity_limit' );
-		remove_all_filters( 'graphql_response_headers_to_send' );
-		remove_all_filters( 'graphql_query_complexity_limit' );
-		remove_all_filters( 'graphql_request_results' );
-
-		parent::tear_down();
+	protected function get_filters_to_clean(): array {
+		return [
+			'wp_headless_module_enabled',
+			'wp_headless_graphql_cache_headers',
+			'wp_headless_graphql_complexity_limit',
+			'graphql_response_headers_to_send',
+			'graphql_query_complexity_limit',
+			'graphql_request_results',
+		];
 	}
 
 	// -------------------------------------------------------------------------

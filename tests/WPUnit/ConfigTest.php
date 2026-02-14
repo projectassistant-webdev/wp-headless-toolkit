@@ -7,33 +7,19 @@
 
 namespace Tests\ProjectAssistant\HeadlessToolkit\WPUnit;
 
-use lucatume\WPBrowser\TestCase\WPTestCase;
+use Tests\ProjectAssistant\HeadlessToolkit\HeadlessToolkitTestCase;
 use ProjectAssistant\HeadlessToolkit\Helpers\Config;
 
 /**
  * Tests for the Config helper class.
  */
-class ConfigTest extends WPTestCase {
-
-	/**
-	 * Clean up environment variables after each test.
-	 */
-	protected function tear_down(): void {
-		// Clean up any test env vars.
-		putenv( 'PA_TEST_CONFIG_KEY' );
-		putenv( 'PA_TEST_BOOL_KEY' );
-		putenv( 'PA_TEST_LIST_KEY' );
-		putenv( 'PA_TEST_HAS_KEY' );
-		putenv( 'PA_TEST_PRIORITY_KEY' );
-
-		parent::tear_down();
-	}
+class ConfigTest extends HeadlessToolkitTestCase {
 
 	/**
 	 * Test that get() returns environment variable value when set.
 	 */
 	public function test_get_returns_env_var_value(): void {
-		putenv( 'PA_TEST_CONFIG_KEY=env_value' );
+		$this->set_env( 'PA_TEST_CONFIG_KEY', 'env_value' );
 
 		$result = Config::get( 'PA_TEST_CONFIG_KEY', 'default' );
 
@@ -70,7 +56,7 @@ class ConfigTest extends WPTestCase {
 		if ( ! defined( 'PA_TEST_PRIORITY_KEY' ) ) {
 			define( 'PA_TEST_PRIORITY_KEY', 'from_constant' );
 		}
-		putenv( 'PA_TEST_PRIORITY_KEY=from_env' );
+		$this->set_env( 'PA_TEST_PRIORITY_KEY', 'from_env' );
 
 		$result = Config::get( 'PA_TEST_PRIORITY_KEY', 'default' );
 
@@ -84,7 +70,7 @@ class ConfigTest extends WPTestCase {
 		$truthy_values = [ 'true', '1', 'yes', 'on' ];
 
 		foreach ( $truthy_values as $value ) {
-			putenv( "PA_TEST_BOOL_KEY={$value}" );
+			$this->set_env( 'PA_TEST_BOOL_KEY', $value );
 			$result = Config::get_bool( 'PA_TEST_BOOL_KEY', false );
 			$this->assertTrue( $result, "Config::get_bool() must return true for '{$value}'." );
 		}
@@ -97,7 +83,7 @@ class ConfigTest extends WPTestCase {
 		$falsy_values = [ 'false', '0', 'no', 'off' ];
 
 		foreach ( $falsy_values as $value ) {
-			putenv( "PA_TEST_BOOL_KEY={$value}" );
+			$this->set_env( 'PA_TEST_BOOL_KEY', $value );
 			$result = Config::get_bool( 'PA_TEST_BOOL_KEY', true );
 			$this->assertFalse( $result, "Config::get_bool() must return false for '{$value}'." );
 		}
@@ -118,7 +104,7 @@ class ConfigTest extends WPTestCase {
 	 * Test that get_list() splits comma-separated values.
 	 */
 	public function test_get_list_splits_comma_separated(): void {
-		putenv( 'PA_TEST_LIST_KEY=a,b,c' );
+		$this->set_env( 'PA_TEST_LIST_KEY', 'a,b,c' );
 
 		$result = Config::get_list( 'PA_TEST_LIST_KEY' );
 
@@ -129,7 +115,7 @@ class ConfigTest extends WPTestCase {
 	 * Test that get_list() trims whitespace from values.
 	 */
 	public function test_get_list_trims_whitespace(): void {
-		putenv( 'PA_TEST_LIST_KEY=a, b , c' );
+		$this->set_env( 'PA_TEST_LIST_KEY', 'a, b , c' );
 
 		$result = Config::get_list( 'PA_TEST_LIST_KEY' );
 
@@ -151,7 +137,7 @@ class ConfigTest extends WPTestCase {
 	 * Test that has() returns true when env var is set.
 	 */
 	public function test_has_returns_true_for_env_var(): void {
-		putenv( 'PA_TEST_HAS_KEY=some_value' );
+		$this->set_env( 'PA_TEST_HAS_KEY', 'some_value' );
 
 		$this->assertTrue( Config::has( 'PA_TEST_HAS_KEY' ), 'Config::has() must return true when env var is set.' );
 	}

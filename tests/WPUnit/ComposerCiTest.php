@@ -10,7 +10,7 @@
 
 namespace Tests\ProjectAssistant\HeadlessToolkit\WPUnit;
 
-use lucatume\WPBrowser\TestCase\WPTestCase;
+use Tests\ProjectAssistant\HeadlessToolkit\HeadlessToolkitTestCase;
 use ProjectAssistant\HeadlessToolkit\Main;
 use ProjectAssistant\HeadlessToolkit\Modules\ModuleInterface;
 use ProjectAssistant\HeadlessToolkit\Modules\Revalidation\Revalidation;
@@ -23,7 +23,16 @@ use ProjectAssistant\HeadlessToolkit\Helpers\Config;
 /**
  * Tests for Composer distribution and CI readiness.
  */
-class ComposerCiTest extends WPTestCase {
+class ComposerCiTest extends HeadlessToolkitTestCase {
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected function get_filters_to_clean(): array {
+		return [
+			'wp_headless_module_classes',
+		];
+	}
 
 	/**
 	 * Reset the Main singleton between tests to prevent state leakage.
@@ -33,8 +42,6 @@ class ComposerCiTest extends WPTestCase {
 		$instance_prop = $reflection->getProperty( 'instance' );
 		$instance_prop->setAccessible( true );
 		$instance_prop->setValue( null, null );
-
-		remove_all_filters( 'wp_headless_module_classes' );
 
 		parent::tear_down();
 	}

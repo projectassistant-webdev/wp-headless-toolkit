@@ -7,14 +7,14 @@
 
 namespace Tests\ProjectAssistant\HeadlessToolkit\WPUnit;
 
-use lucatume\WPBrowser\TestCase\WPTestCase;
+use Tests\ProjectAssistant\HeadlessToolkit\HeadlessToolkitTestCase;
 use ProjectAssistant\HeadlessToolkit\Modules\PreviewMode\PreviewMode;
 use ProjectAssistant\HeadlessToolkit\Modules\ModuleInterface;
 
 /**
  * Tests for the Preview Mode module.
  */
-class PreviewModeTest extends WPTestCase {
+class PreviewModeTest extends HeadlessToolkitTestCase {
 
 	/**
 	 * The module instance under test.
@@ -22,13 +22,6 @@ class PreviewModeTest extends WPTestCase {
 	 * @var PreviewMode
 	 */
 	private PreviewMode $module;
-
-	/**
-	 * Environment variables to clean up in tear_down.
-	 *
-	 * @var string[]
-	 */
-	private array $env_vars_to_clean = [];
 
 	/**
 	 * Set up test environment.
@@ -39,33 +32,16 @@ class PreviewModeTest extends WPTestCase {
 	}
 
 	/**
-	 * Clean up filters and env vars after each test.
+	 * {@inheritDoc}
 	 */
-	protected function tear_down(): void {
-		// Clean up env vars.
-		foreach ( $this->env_vars_to_clean as $key ) {
-			putenv( $key );
-		}
-		$this->env_vars_to_clean = [];
-
-		remove_all_filters( 'wp_headless_module_enabled' );
-		remove_all_filters( 'wp_headless_preview_url' );
-		remove_all_filters( 'wp_headless_config_value' );
-		remove_all_filters( 'preview_post_link' );
-		remove_all_filters( 'rest_api_init' );
-
-		parent::tear_down();
-	}
-
-	/**
-	 * Helper to set an env var and register it for cleanup.
-	 *
-	 * @param string $key   The env var name.
-	 * @param string $value The env var value.
-	 */
-	private function set_env( string $key, string $value ): void {
-		putenv( "{$key}={$value}" );
-		$this->env_vars_to_clean[] = $key;
+	protected function get_filters_to_clean(): array {
+		return [
+			'wp_headless_module_enabled',
+			'wp_headless_preview_url',
+			'wp_headless_config_value',
+			'preview_post_link',
+			'rest_api_init',
+		];
 	}
 
 	/**

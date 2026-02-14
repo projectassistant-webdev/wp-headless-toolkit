@@ -7,12 +7,22 @@
 
 namespace Tests\ProjectAssistant\HeadlessToolkit\WPUnit;
 
-use lucatume\WPBrowser\TestCase\WPTestCase;
+use Tests\ProjectAssistant\HeadlessToolkit\HeadlessToolkitTestCase;
 
 /**
  * Tests for the global access functions.
  */
-class AccessFunctionsTest extends WPTestCase {
+class AccessFunctionsTest extends HeadlessToolkitTestCase {
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected function get_filters_to_clean(): array {
+		return [
+			'wp_headless_config_value',
+			'wp_headless_module_enabled',
+		];
+	}
 
 	/**
 	 * Clean up environment variables after each test.
@@ -20,10 +30,6 @@ class AccessFunctionsTest extends WPTestCase {
 	protected function tear_down(): void {
 		putenv( 'PA_TEST_ACCESS_CONFIG_KEY' );
 		putenv( 'WP_HEADLESS_DISABLE_TEST_MODULE' );
-
-		// Remove any test filters.
-		remove_all_filters( 'wp_headless_config_value' );
-		remove_all_filters( 'wp_headless_module_enabled' );
 
 		parent::tear_down();
 	}
