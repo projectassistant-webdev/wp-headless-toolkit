@@ -10,6 +10,7 @@ namespace ProjectAssistant\HeadlessToolkit;
 
 use ProjectAssistant\HeadlessToolkit\Modules\ModuleInterface;
 use ProjectAssistant\HeadlessToolkit\Modules\Revalidation\Revalidation;
+use ProjectAssistant\HeadlessToolkit\Modules\CloudflarePurge\CloudflarePurge;
 use ProjectAssistant\HeadlessToolkit\Modules\RestSecurity\RestSecurity;
 use ProjectAssistant\HeadlessToolkit\Modules\FrontendRedirect\FrontendRedirect;
 use ProjectAssistant\HeadlessToolkit\Modules\MigrateDbCompat\MigrateDbCompat;
@@ -116,6 +117,7 @@ if ( ! class_exists( 'ProjectAssistant\HeadlessToolkit\Main' ) ) :
 		private function get_default_modules(): array {
 			return [
 				Revalidation::class,
+				CloudflarePurge::class,
 				RestSecurity::class,
 				FrontendRedirect::class,
 				MigrateDbCompat::class,
