@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Initializes a singleton instance of the plugin and loads all modules.
  *
