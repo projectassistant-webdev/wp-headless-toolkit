@@ -36,7 +36,7 @@ Add the Bitbucket repository to your `composer.json`:
     }
   ],
   "require": {
-    "projectassistant/wordpress-headless-toolkit": "^1.3"
+    "projectassistant/wp-headless-toolkit": "^1.3"
   }
 }
 ```

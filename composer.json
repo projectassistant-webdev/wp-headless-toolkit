@@ -1,14 +1,32 @@
 {
-	"name": "projectassistant/wordpress-headless-toolkit",
+	"name": "projectassistant/wp-headless-toolkit",
 	"description": "Unified headless WordPress plugin for Next.js projects - ISR revalidation, REST security, CORS, preview mode, and more.",
 	"type": "wordpress-plugin",
 	"license": "GPL-3.0-or-later",
+	"keywords": [
+		"wordpress",
+		"headless",
+		"nextjs",
+		"graphql",
+		"isr",
+		"revalidation",
+		"cors",
+		"rest-api",
+		"preview-mode",
+		"wp-graphql"
+	],
+	"homepage": "https://bitbucket.org/projectassistant/wp-headless-toolkit",
 	"authors": [
 		{
 			"name": "Project Assistant",
-			"homepage": "https://projectassistant.org"
+			"email": "webdev@projectassistant.org",
+			"homepage": "https://www.projectassistant.org"
 		}
 	],
+	"support": {
+		"issues": "https://bitbucket.org/projectassistant/wp-headless-toolkit/issues",
+		"source": "https://bitbucket.org/projectassistant/wp-headless-toolkit"
+	},
 	"require": {
 		"php": ">=8.1",
 		"ext-json": "*"

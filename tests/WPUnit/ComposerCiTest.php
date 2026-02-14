@@ -177,7 +177,7 @@ class ComposerCiTest extends HeadlessToolkitTestCase {
 
 		$json = json_decode( $content, true );
 		$this->assertIsArray( $json );
-		$this->assertSame( 'projectassistant/wordpress-headless-toolkit', $json['name'] );
+		$this->assertSame( 'projectassistant/wp-headless-toolkit', $json['name'] );
 		$this->assertSame( 'wordpress-plugin', $json['type'] );
 	}
 

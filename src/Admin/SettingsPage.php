@@ -114,7 +114,7 @@ class SettingsPage {
 			<h2>Documentation</h2>
 			<p>
 				For full documentation and setup instructions, visit the
-				<a href="https://bitbucket.org/projectassistant/wordpress-headless-toolkit" target="_blank" rel="noopener noreferrer">
+				<a href="https://bitbucket.org/projectassistant/wp-headless-toolkit" target="_blank" rel="noopener noreferrer">
 					plugin documentation
 				</a>.
 			</p>
