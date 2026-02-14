@@ -9,6 +9,14 @@ paths:
 
 actor_suffix: Tester
 
+coverage:
+  enabled: true
+  include:
+    - src/*
+  exclude:
+    - tests/*
+    - vendor/*
+
 extensions:
   enabled:
     - Codeception\Extension\RunFailed

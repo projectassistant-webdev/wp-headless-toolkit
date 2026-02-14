@@ -303,6 +303,9 @@ definitions:
           # Install pcov for code coverage (staging only)
           - pecl install pcov && docker-php-ext-enable pcov
           - echo "pcov.directory=/var/www/html/wp-content/plugins/wp-headless-toolkit/src" >> /usr/local/etc/php/conf.d/pcov.ini
+          # Verify pcov is loaded before proceeding
+          - php -m | grep pcov || { echo "ERROR: pcov extension not loaded"; exit 1; }
+          - echo "pcov loaded successfully"
 
           # Install Composer
           - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
