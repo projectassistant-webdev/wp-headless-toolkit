@@ -56,6 +56,8 @@ class CorsTest extends HeadlessToolkitTestCase {
 
 	/**
 	 * Test that Cors implements ModuleInterface.
+	 *
+	 * @group smoke
 	 */
 	public function test_implements_module_interface(): void {
 		$this->assertInstanceOf(

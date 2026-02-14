@@ -168,6 +168,7 @@ class FrontendRedirectTest extends HeadlessToolkitTestCase {
 
 	/**
 	 * @test
+	 * @group smoke
 	 */
 	public function test_get_slug_returns_frontend_redirect(): void {
 		$this->assertSame( 'frontend_redirect', FrontendRedirect::get_slug() );

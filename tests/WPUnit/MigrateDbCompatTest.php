@@ -32,6 +32,8 @@ class MigrateDbCompatTest extends HeadlessToolkitTestCase {
 
 	/**
 	 * Test that get_slug() returns the expected slug string.
+	 *
+	 * @group smoke
 	 */
 	public function test_get_slug(): void {
 		$this->assertSame(

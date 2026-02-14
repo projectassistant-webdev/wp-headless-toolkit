@@ -56,6 +56,8 @@ class SettingsPageTest extends HeadlessToolkitTestCase {
 
 	/**
 	 * Test that init() registers the admin_menu action.
+	 *
+	 * @group smoke
 	 */
 	public function test_init_registers_admin_menu_action(): void {
 		$this->settings_page->init();

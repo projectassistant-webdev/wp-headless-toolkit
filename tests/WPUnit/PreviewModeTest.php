@@ -64,6 +64,8 @@ class PreviewModeTest extends HeadlessToolkitTestCase {
 
 	/**
 	 * Test that PreviewMode implements ModuleInterface.
+	 *
+	 * @group smoke
 	 */
 	public function test_implements_module_interface(): void {
 		$this->assertInstanceOf(

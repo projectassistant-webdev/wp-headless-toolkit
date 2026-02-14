@@ -54,6 +54,8 @@ class GraphqlPerformanceTest extends HeadlessToolkitTestCase {
 
 	/**
 	 * Test that GraphqlPerformance implements ModuleInterface.
+	 *
+	 * @group smoke
 	 */
 	public function test_implements_module_interface(): void {
 		$this->assertInstanceOf(

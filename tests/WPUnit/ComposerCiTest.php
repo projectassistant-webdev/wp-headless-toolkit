@@ -55,6 +55,8 @@ class ComposerCiTest extends HeadlessToolkitTestCase {
 
 	/**
 	 * Test that the main plugin file exists at the expected location.
+	 *
+	 * @group smoke
 	 */
 	public function test_plugin_file_exists(): void {
 		$plugin_file = WP_HEADLESS_PLUGIN_DIR . 'wp-headless-toolkit.php';
@@ -71,6 +73,8 @@ class ComposerCiTest extends HeadlessToolkitTestCase {
 
 	/**
 	 * Test that the Main class is autoloadable via Composer.
+	 *
+	 * @group smoke
 	 */
 	public function test_main_class_is_autoloadable(): void {
 		$this->assertTrue( class_exists( Main::class ) );

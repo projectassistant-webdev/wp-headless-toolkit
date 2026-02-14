@@ -33,6 +33,8 @@ class ActivationTest extends HeadlessToolkitTestCase {
 	 *
 	 * This validates the bug fix: the original implementation returned a callable
 	 * (closure) instead of executing the activation logic directly.
+	 *
+	 * @group smoke
 	 */
 	public function test_activation_callback_return_type_is_void(): void {
 		$reflection = new \ReflectionFunction( 'wp_headless_activation_callback' );

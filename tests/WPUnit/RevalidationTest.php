@@ -111,6 +111,8 @@ class RevalidationTest extends HeadlessToolkitTestCase {
 
 	/**
 	 * Test that get_slug() returns the expected slug.
+	 *
+	 * @group smoke
 	 */
 	public function test_get_slug_returns_revalidation(): void {
 		$this->assertSame(

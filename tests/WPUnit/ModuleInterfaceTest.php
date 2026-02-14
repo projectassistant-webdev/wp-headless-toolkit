@@ -21,6 +21,8 @@ class ModuleInterfaceTest extends HeadlessToolkitTestCase {
 
 	/**
 	 * Test that MigrateDbCompat implements ModuleInterface.
+	 *
+	 * @group smoke
 	 */
 	public function test_migrate_db_compat_implements_interface(): void {
 		$this->assertTrue(

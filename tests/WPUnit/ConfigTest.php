@@ -20,6 +20,8 @@ class ConfigTest extends HeadlessToolkitTestCase {
 
 	/**
 	 * Test that get() returns environment variable value when set.
+	 *
+	 * @group smoke
 	 */
 	public function test_get_returns_env_var_value(): void {
 		$this->set_env( 'PA_TEST_CONFIG_KEY', 'env_value' );
@@ -68,6 +70,8 @@ class ConfigTest extends HeadlessToolkitTestCase {
 
 	/**
 	 * Test that get_bool() returns true for truthy strings.
+	 *
+	 * @group smoke
 	 */
 	public function test_get_bool_returns_true_for_truthy_strings(): void {
 		$truthy_values = [ 'true', '1', 'yes', 'on' ];
@@ -138,6 +142,8 @@ class ConfigTest extends HeadlessToolkitTestCase {
 
 	/**
 	 * Test that has() returns true when env var is set.
+	 *
+	 * @group smoke
 	 */
 	public function test_has_returns_true_for_env_var(): void {
 		$this->set_env( 'PA_TEST_HAS_KEY', 'some_value' );

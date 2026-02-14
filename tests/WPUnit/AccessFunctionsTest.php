@@ -39,6 +39,8 @@ class AccessFunctionsTest extends HeadlessToolkitTestCase {
 
 	/**
 	 * Test that wp_headless_get_config() prioritizes env var over constant and default.
+	 *
+	 * @group smoke
 	 */
 	public function test_get_config_env_priority(): void {
 		if ( ! defined( 'PA_TEST_ACCESS_CONFIG_KEY' ) ) {
