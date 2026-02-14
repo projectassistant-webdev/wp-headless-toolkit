@@ -7,19 +7,16 @@
 
 namespace Tests\ProjectAssistant\HeadlessToolkit\WPUnit;
 
-use lucatume\WPBrowser\TestCase\WPTestCase;
+use Tests\ProjectAssistant\HeadlessToolkit\HeadlessToolkitTestCase;
 use ProjectAssistant\HeadlessToolkit\Modules\FrontendRedirect\FrontendRedirect;
 
 /**
  * Tests for the FrontendRedirect module.
  *
- * IMPORTANT: Test method order matters. Tests that define PHP constants
- * (WP_CLI, REST_REQUEST, DOING_AJAX, DOING_CRON, GRAPHQL_HTTP_REQUEST)
- * are placed LAST because constants cannot be undefined once set and would
- * cause all subsequent redirect tests to fail (is_passthrough_request()
- * would always return true).
+ * @group module
+ * @group frontend-redirect
  */
-class FrontendRedirectTest extends WPTestCase {
+class FrontendRedirectTest extends HeadlessToolkitTestCase {
 
 	/**
 	 * The module instance under test.
@@ -70,7 +67,7 @@ class FrontendRedirectTest extends WPTestCase {
 		parent::set_up();
 		$this->module = new FrontendRedirect();
 
-		putenv( 'HEADLESS_FRONTEND_URL=https://frontend.example.com' );
+		$this->set_env( 'HEADLESS_FRONTEND_URL', 'https://frontend.example.com' );
 
 		// Save globals for restoration.
 		$this->original_request_uri    = $_SERVER['REQUEST_URI'] ?? null;
@@ -88,19 +85,24 @@ class FrontendRedirectTest extends WPTestCase {
 	}
 
 	/**
-	 * Clean up filters, env vars, and globals after each test.
+	 * {@inheritDoc}
+	 */
+	protected function get_filters_to_clean(): array {
+		return [
+			'wp_headless_module_enabled',
+			'wp_headless_redirect_url',
+			'wp_headless_preview_link',
+			'wp_headless_is_passthrough_request',
+			'wp_redirect',
+			'template_redirect',
+			'preview_post_link',
+		];
+	}
+
+	/**
+	 * Clean up globals after each test.
 	 */
 	protected function tear_down(): void {
-		putenv( 'HEADLESS_FRONTEND_URL' );
-
-		remove_all_filters( 'wp_headless_module_enabled' );
-		remove_all_filters( 'wp_headless_redirect_url' );
-		remove_all_filters( 'wp_headless_preview_link' );
-		remove_all_filters( 'wp_headless_is_passthrough_request' );
-		remove_all_filters( 'wp_redirect' );
-		remove_all_filters( 'template_redirect' );
-		remove_all_filters( 'preview_post_link' );
-
 		// Restore globals.
 		if ( null === $this->original_request_uri ) {
 			unset( $_SERVER['REQUEST_URI'] );
@@ -166,6 +168,7 @@ class FrontendRedirectTest extends WPTestCase {
 
 	/**
 	 * @test
+	 * @group smoke
 	 */
 	public function test_get_slug_returns_frontend_redirect(): void {
 		$this->assertSame( 'frontend_redirect', FrontendRedirect::get_slug() );
@@ -523,32 +526,13 @@ class FrontendRedirectTest extends WPTestCase {
 	}
 
 	// -------------------------------------------------------------------
-	// 7. Passthrough Tests (constant-defining -- MUST run LAST)
-	// -------------------------------------------------------------------
-	//
-	// WARNING - EXECUTION ORDER DEPENDENCY:
-	//
-	// These tests define PHP constants (WP_CLI, REST_REQUEST, DOING_AJAX,
-	// DOING_CRON, GRAPHQL_HTTP_REQUEST) that persist for the lifetime of
-	// the PHP process. PHP constants cannot be undefined or redefined
-	// once set.
-	//
-	// Because is_passthrough_request() checks these constants, defining
-	// them as `true` causes ALL subsequent calls to maybe_redirect() to
-	// return early (passthrough). If these tests ran before the redirect
-	// behavior tests in sections 4-6, those tests would never trigger a
-	// redirect and would produce false positives.
-	//
-	// PHPUnit (and Codeception wpunit) executes test methods in the order
-	// they appear in the file. This section MUST remain at the end of the
-	// class to guarantee correct behaviour.
-	//
-	// DO NOT move these tests above the redirect behavior tests.
-	// DO NOT add new redirect behavior tests after this section.
+	// 7. Passthrough Tests (constant-defining -- run in separate process)
 	// -------------------------------------------------------------------
 
 	/**
 	 * @test
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
 	 */
 	public function test_maybe_redirect_skips_for_wp_cli_request(): void {
 		if ( defined( 'WP_CLI' ) ) {
@@ -575,6 +559,8 @@ class FrontendRedirectTest extends WPTestCase {
 
 	/**
 	 * @test
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
 	 */
 	public function test_maybe_redirect_skips_for_rest_request(): void {
 		if ( defined( 'REST_REQUEST' ) ) {
@@ -601,6 +587,8 @@ class FrontendRedirectTest extends WPTestCase {
 
 	/**
 	 * @test
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
 	 */
 	public function test_maybe_redirect_skips_for_ajax_request(): void {
 		if ( defined( 'DOING_AJAX' ) ) {
@@ -627,6 +615,8 @@ class FrontendRedirectTest extends WPTestCase {
 
 	/**
 	 * @test
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
 	 */
 	public function test_maybe_redirect_skips_for_cron_request(): void {
 		if ( defined( 'DOING_CRON' ) ) {
@@ -653,6 +643,8 @@ class FrontendRedirectTest extends WPTestCase {
 
 	/**
 	 * @test
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
 	 */
 	public function test_maybe_redirect_skips_for_graphql_request(): void {
 		if ( defined( 'GRAPHQL_HTTP_REQUEST' ) ) {

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * This file contains access functions for various class methods.
  *

@@ -7,14 +7,17 @@
 
 namespace Tests\ProjectAssistant\HeadlessToolkit\WPUnit;
 
-use lucatume\WPBrowser\TestCase\WPTestCase;
+use Tests\ProjectAssistant\HeadlessToolkit\HeadlessToolkitTestCase;
 use ProjectAssistant\HeadlessToolkit\Modules\SecurityHeaders\SecurityHeaders;
 use ProjectAssistant\HeadlessToolkit\Modules\ModuleInterface;
 
 /**
  * Tests for the Security Headers module.
+ *
+ * @group module
+ * @group security-headers
  */
-class SecurityHeadersTest extends WPTestCase {
+class SecurityHeadersTest extends HeadlessToolkitTestCase {
 
 	/**
 	 * The module instance under test.
@@ -22,13 +25,6 @@ class SecurityHeadersTest extends WPTestCase {
 	 * @var SecurityHeaders
 	 */
 	private SecurityHeaders $module;
-
-	/**
-	 * Environment variables to clean up in tear_down.
-	 *
-	 * @var string[]
-	 */
-	private array $env_vars_to_clean = [];
 
 	/**
 	 * Set up test environment.
@@ -39,33 +35,16 @@ class SecurityHeadersTest extends WPTestCase {
 	}
 
 	/**
-	 * Clean up filters and env vars after each test.
+	 * {@inheritDoc}
 	 */
-	protected function tear_down(): void {
-		// Clean up env vars.
-		foreach ( $this->env_vars_to_clean as $key ) {
-			putenv( $key );
-		}
-		$this->env_vars_to_clean = [];
-
-		remove_all_filters( 'wp_headless_module_enabled' );
-		remove_all_filters( 'wp_headless_security_headers' );
-		remove_all_filters( 'wp_headless_config_value' );
-		remove_all_filters( 'wp_headers' );
-		remove_all_filters( 'rest_post_dispatch' );
-
-		parent::tear_down();
-	}
-
-	/**
-	 * Helper to set an env var and register it for cleanup.
-	 *
-	 * @param string $key   The env var name.
-	 * @param string $value The env var value.
-	 */
-	private function set_env( string $key, string $value ): void {
-		putenv( "{$key}={$value}" );
-		$this->env_vars_to_clean[] = $key;
+	protected function get_filters_to_clean(): array {
+		return [
+			'wp_headless_module_enabled',
+			'wp_headless_security_headers',
+			'wp_headless_config_value',
+			'wp_headers',
+			'rest_post_dispatch',
+		];
 	}
 
 	// -------------------------------------------------------------------------
@@ -74,6 +53,8 @@ class SecurityHeadersTest extends WPTestCase {
 
 	/**
 	 * Test that SecurityHeaders implements ModuleInterface.
+	 *
+	 * @group smoke
 	 */
 	public function test_implements_module_interface(): void {
 		$this->assertInstanceOf(

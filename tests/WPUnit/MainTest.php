@@ -7,15 +7,29 @@
 
 namespace Tests\ProjectAssistant\HeadlessToolkit\WPUnit;
 
-use lucatume\WPBrowser\TestCase\WPTestCase;
+use Tests\ProjectAssistant\HeadlessToolkit\HeadlessToolkitTestCase;
 use ProjectAssistant\HeadlessToolkit\Main;
 use ProjectAssistant\HeadlessToolkit\Modules\ModuleInterface;
 use ProjectAssistant\HeadlessToolkit\Modules\MigrateDbCompat\MigrateDbCompat;
 
 /**
  * Tests for the Main singleton and module loader.
+ *
+ * @group unit
+ * @group main
  */
-class MainTest extends WPTestCase {
+class MainTest extends HeadlessToolkitTestCase {
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected function get_filters_to_clean(): array {
+		return [
+			'wp_headless_module_classes',
+			'wp_headless_init',
+			'wp_headless_modules_loaded',
+		];
+	}
 
 	/**
 	 * Reset the Main singleton between tests to prevent state leakage.
@@ -26,16 +40,13 @@ class MainTest extends WPTestCase {
 		$instance_prop->setAccessible( true );
 		$instance_prop->setValue( null, null );
 
-		// Remove any test filters added during tests.
-		remove_all_filters( 'wp_headless_module_classes' );
-		remove_all_filters( 'wp_headless_init' );
-		remove_all_filters( 'wp_headless_modules_loaded' );
-
 		parent::tear_down();
 	}
 
 	/**
 	 * Test that Main::instance() returns the same instance on repeated calls.
+	 *
+	 * @group smoke
 	 */
 	public function test_instance_returns_singleton(): void {
 		$instance1 = Main::instance();
@@ -46,6 +57,8 @@ class MainTest extends WPTestCase {
 
 	/**
 	 * Test that Main::instance() returns an instance of Main.
+	 *
+	 * @group smoke
 	 */
 	public function test_instance_returns_main_class(): void {
 		$instance = Main::instance();
@@ -59,6 +72,8 @@ class MainTest extends WPTestCase {
 	 * Note: In the test environment, most modules' is_enabled() returns false
 	 * because their dependencies are not present. We verify modules array is
 	 * populated by filtering in a simple test module.
+	 *
+	 * @group smoke
 	 */
 	public function test_load_modules_registers_default_modules(): void {
 		// Filter module classes to only include MigrateDbCompat (we can control its enablement).
@@ -118,12 +133,8 @@ class MainTest extends WPTestCase {
 	/**
 	 * Test that get_module returns a module by slug when it is loaded.
 	 *
-	 * NOTE: This test defines the WPMDB_PRO_VERSION constant, which persists for
-	 * the lifetime of the PHP process. Tests that assert MigrateDbCompat is
-	 * disabled (e.g. test_load_modules_skips_disabled_modules) must run BEFORE
-	 * this test. PHPUnit runs tests in declaration order by default, so the
-	 * current ordering is intentional. Do not reorder without accounting for
-	 * this constant-leakage side effect.
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
 	 */
 	public function test_get_module_returns_module_by_slug(): void {
 		// Define the constant so MigrateDbCompat::is_enabled() returns true.
@@ -215,6 +226,8 @@ class MainTest extends WPTestCase {
 
 	/**
 	 * Test that wp_headless_modules_loaded action fires with module array.
+	 *
+	 * @group smoke
 	 */
 	public function test_wp_headless_modules_loaded_action_fires(): void {
 		$received_modules = null;

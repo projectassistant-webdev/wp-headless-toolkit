@@ -7,13 +7,16 @@
 
 namespace Tests\ProjectAssistant\HeadlessToolkit\WPUnit;
 
-use lucatume\WPBrowser\TestCase\WPTestCase;
+use Tests\ProjectAssistant\HeadlessToolkit\HeadlessToolkitTestCase;
 use ProjectAssistant\HeadlessToolkit\Modules\Revalidation\Revalidation;
 
 /**
  * Tests for the Revalidation module.
+ *
+ * @group module
+ * @group revalidation
  */
-class RevalidationTest extends WPTestCase {
+class RevalidationTest extends HeadlessToolkitTestCase {
 
 	/**
 	 * Captured HTTP request data from pre_http_request filter.
@@ -34,27 +37,32 @@ class RevalidationTest extends WPTestCase {
 	 */
 	protected function set_up(): void {
 		parent::set_up();
-		putenv( 'NEXTJS_REVALIDATION_URL=https://example.com/api/revalidate/' );
-		putenv( 'NEXTJS_REVALIDATION_SECRET=test-secret-123' );
+		$this->set_env( 'NEXTJS_REVALIDATION_URL', 'https://example.com/api/revalidate/' );
+		$this->set_env( 'NEXTJS_REVALIDATION_SECRET', 'test-secret-123' );
 
 		$this->captured_request     = null;
 		$this->captured_sent_action = null;
 	}
 
 	/**
-	 * Clean up filters and env vars after each test.
+	 * {@inheritDoc}
+	 */
+	protected function get_filters_to_clean(): array {
+		return [
+			'pre_http_request',
+			'wp_headless_module_enabled',
+			'wp_headless_revalidation_post_types',
+			'wp_headless_revalidation_tags',
+			'wp_headless_revalidation_request_args',
+			'wp_headless_revalidation_sent',
+		];
+	}
+
+	/**
+	 * Clean up additional env vars after each test.
 	 */
 	protected function tear_down(): void {
-		putenv( 'NEXTJS_REVALIDATION_URL' );
-		putenv( 'NEXTJS_REVALIDATION_SECRET' );
 		putenv( 'WP_HEADLESS_DISABLE_REVALIDATION' );
-
-		remove_all_filters( 'pre_http_request' );
-		remove_all_filters( 'wp_headless_module_enabled' );
-		remove_all_filters( 'wp_headless_revalidation_post_types' );
-		remove_all_filters( 'wp_headless_revalidation_tags' );
-		remove_all_filters( 'wp_headless_revalidation_request_args' );
-		remove_all_actions( 'wp_headless_revalidation_sent' );
 
 		parent::tear_down();
 	}
@@ -103,6 +111,8 @@ class RevalidationTest extends WPTestCase {
 
 	/**
 	 * Test that get_slug() returns the expected slug.
+	 *
+	 * @group smoke
 	 */
 	public function test_get_slug_returns_revalidation(): void {
 		$this->assertSame(

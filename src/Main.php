@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Initializes a singleton instance of the plugin and loads all modules.
  *
@@ -30,7 +31,7 @@ if ( ! class_exists( 'ProjectAssistant\HeadlessToolkit\Main' ) ) :
 		 *
 		 * @var ?self $instance
 		 */
-		private static $instance;
+		private static ?self $instance = null;
 
 		/**
 		 * Loaded module instances.

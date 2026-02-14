@@ -10,7 +10,7 @@
 
 namespace Tests\ProjectAssistant\HeadlessToolkit\WPUnit;
 
-use lucatume\WPBrowser\TestCase\WPTestCase;
+use Tests\ProjectAssistant\HeadlessToolkit\HeadlessToolkitTestCase;
 use ProjectAssistant\HeadlessToolkit\Main;
 use ProjectAssistant\HeadlessToolkit\Modules\ModuleInterface;
 use ProjectAssistant\HeadlessToolkit\Modules\Revalidation\Revalidation;
@@ -18,12 +18,28 @@ use ProjectAssistant\HeadlessToolkit\Modules\RestSecurity\RestSecurity;
 use ProjectAssistant\HeadlessToolkit\Modules\FrontendRedirect\FrontendRedirect;
 use ProjectAssistant\HeadlessToolkit\Modules\MigrateDbCompat\MigrateDbCompat;
 use ProjectAssistant\HeadlessToolkit\Modules\HeadCleanup\HeadCleanup;
+use ProjectAssistant\HeadlessToolkit\Modules\Cors\Cors;
+use ProjectAssistant\HeadlessToolkit\Modules\SecurityHeaders\SecurityHeaders;
+use ProjectAssistant\HeadlessToolkit\Modules\GraphqlPerformance\GraphqlPerformance;
+use ProjectAssistant\HeadlessToolkit\Modules\PreviewMode\PreviewMode;
 use ProjectAssistant\HeadlessToolkit\Helpers\Config;
 
 /**
  * Tests for Composer distribution and CI readiness.
+ *
+ * @group integration
+ * @group composer-ci
  */
-class ComposerCiTest extends WPTestCase {
+class ComposerCiTest extends HeadlessToolkitTestCase {
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected function get_filters_to_clean(): array {
+		return [
+			'wp_headless_module_classes',
+		];
+	}
 
 	/**
 	 * Reset the Main singleton between tests to prevent state leakage.
@@ -34,13 +50,13 @@ class ComposerCiTest extends WPTestCase {
 		$instance_prop->setAccessible( true );
 		$instance_prop->setValue( null, null );
 
-		remove_all_filters( 'wp_headless_module_classes' );
-
 		parent::tear_down();
 	}
 
 	/**
 	 * Test that the main plugin file exists at the expected location.
+	 *
+	 * @group smoke
 	 */
 	public function test_plugin_file_exists(): void {
 		$plugin_file = WP_HEADLESS_PLUGIN_DIR . 'wp-headless-toolkit.php';
@@ -57,6 +73,8 @@ class ComposerCiTest extends WPTestCase {
 
 	/**
 	 * Test that the Main class is autoloadable via Composer.
+	 *
+	 * @group smoke
 	 */
 	public function test_main_class_is_autoloadable(): void {
 		$this->assertTrue( class_exists( Main::class ) );
@@ -97,27 +115,35 @@ class ComposerCiTest extends WPTestCase {
 	 */
 	public static function module_class_provider(): array {
 		return [
-			'Revalidation'     => [ Revalidation::class ],
-			'RestSecurity'     => [ RestSecurity::class ],
-			'FrontendRedirect' => [ FrontendRedirect::class ],
-			'MigrateDbCompat'  => [ MigrateDbCompat::class ],
-			'HeadCleanup'      => [ HeadCleanup::class ],
+			'Revalidation'       => [ Revalidation::class ],
+			'RestSecurity'       => [ RestSecurity::class ],
+			'FrontendRedirect'   => [ FrontendRedirect::class ],
+			'MigrateDbCompat'    => [ MigrateDbCompat::class ],
+			'HeadCleanup'        => [ HeadCleanup::class ],
+			'Cors'               => [ Cors::class ],
+			'SecurityHeaders'    => [ SecurityHeaders::class ],
+			'GraphqlPerformance' => [ GraphqlPerformance::class ],
+			'PreviewMode'        => [ PreviewMode::class ],
 		];
 	}
 
 	/**
-	 * Test that all 5 default modules are registered after plugin initialization.
+	 * Test that all 9 default modules are registered after plugin initialization.
 	 */
 	public function test_all_default_modules_registered(): void {
 		$main    = Main::instance();
 		$classes = $main->get_registered_module_classes();
 
 		$expected_modules = [
-			Revalidation::class,
 			RestSecurity::class,
-			FrontendRedirect::class,
-			MigrateDbCompat::class,
 			HeadCleanup::class,
+			FrontendRedirect::class,
+			Revalidation::class,
+			MigrateDbCompat::class,
+			Cors::class,
+			SecurityHeaders::class,
+			GraphqlPerformance::class,
+			PreviewMode::class,
 		];
 
 		foreach ( $expected_modules as $module_class ) {
@@ -128,7 +154,7 @@ class ComposerCiTest extends WPTestCase {
 			);
 		}
 
-		$this->assertCount( 5, $expected_modules );
+		$this->assertCount( 9, $expected_modules );
 	}
 
 	/**

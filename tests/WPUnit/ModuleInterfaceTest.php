@@ -7,17 +7,22 @@
 
 namespace Tests\ProjectAssistant\HeadlessToolkit\WPUnit;
 
-use lucatume\WPBrowser\TestCase\WPTestCase;
+use Tests\ProjectAssistant\HeadlessToolkit\HeadlessToolkitTestCase;
 use ProjectAssistant\HeadlessToolkit\Modules\ModuleInterface;
 use ProjectAssistant\HeadlessToolkit\Modules\MigrateDbCompat\MigrateDbCompat;
 
 /**
  * Tests for the ModuleInterface contract.
+ *
+ * @group unit
+ * @group module-interface
  */
-class ModuleInterfaceTest extends WPTestCase {
+class ModuleInterfaceTest extends HeadlessToolkitTestCase {
 
 	/**
 	 * Test that MigrateDbCompat implements ModuleInterface.
+	 *
+	 * @group smoke
 	 */
 	public function test_migrate_db_compat_implements_interface(): void {
 		$this->assertTrue(
