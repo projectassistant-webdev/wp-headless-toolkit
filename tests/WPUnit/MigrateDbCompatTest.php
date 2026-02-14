@@ -7,28 +7,33 @@
 
 namespace Tests\ProjectAssistant\HeadlessToolkit\WPUnit;
 
-use lucatume\WPBrowser\TestCase\WPTestCase;
+use Tests\ProjectAssistant\HeadlessToolkit\HeadlessToolkitTestCase;
 use ProjectAssistant\HeadlessToolkit\Modules\MigrateDbCompat\MigrateDbCompat;
 
 /**
  * Tests for the MigrateDbCompat module.
+ *
+ * @group module
+ * @group migrate-db-compat
  */
-class MigrateDbCompatTest extends WPTestCase {
+class MigrateDbCompatTest extends HeadlessToolkitTestCase {
 
 	/**
-	 * Clean up filters after each test.
+	 * {@inheritDoc}
 	 */
-	protected function tear_down(): void {
-		remove_all_filters( 'wpmdb_upload_dir' );
-		remove_all_filters( 'wpmdb_upload_info' );
-		remove_all_filters( 'wpmdb_get_path' );
-		remove_all_filters( 'wp_headless_module_enabled' );
-
-		parent::tear_down();
+	protected function get_filters_to_clean(): array {
+		return [
+			'wpmdb_upload_dir',
+			'wpmdb_upload_info',
+			'wpmdb_get_path',
+			'wp_headless_module_enabled',
+		];
 	}
 
 	/**
 	 * Test that get_slug() returns the expected slug string.
+	 *
+	 * @group smoke
 	 */
 	public function test_get_slug(): void {
 		$this->assertSame(
@@ -51,6 +56,9 @@ class MigrateDbCompatTest extends WPTestCase {
 
 	/**
 	 * Test that is_enabled() returns true when WPMDB_PRO_VERSION is defined.
+	 *
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
 	 */
 	public function test_is_enabled_with_wpmdb_constant(): void {
 		// WPMDB_PRO_VERSION may already be defined from MainTest.

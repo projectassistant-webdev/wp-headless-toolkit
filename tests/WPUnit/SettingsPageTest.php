@@ -7,14 +7,17 @@
 
 namespace Tests\ProjectAssistant\HeadlessToolkit\WPUnit;
 
-use lucatume\WPBrowser\TestCase\WPTestCase;
+use Tests\ProjectAssistant\HeadlessToolkit\HeadlessToolkitTestCase;
 use ProjectAssistant\HeadlessToolkit\Admin\SettingsPage;
 use ProjectAssistant\HeadlessToolkit\Main;
 
 /**
  * Tests for the SettingsPage admin page.
+ *
+ * @group module
+ * @group settings-page
  */
-class SettingsPageTest extends WPTestCase {
+class SettingsPageTest extends HeadlessToolkitTestCase {
 
 	/**
 	 * The SettingsPage instance under test.
@@ -22,13 +25,6 @@ class SettingsPageTest extends WPTestCase {
 	 * @var SettingsPage
 	 */
 	private SettingsPage $settings_page;
-
-	/**
-	 * Environment variables to clean up in tear_down.
-	 *
-	 * @var string[]
-	 */
-	private array $env_vars_to_clean = [];
 
 	/**
 	 * Set up test environment.
@@ -39,37 +35,19 @@ class SettingsPageTest extends WPTestCase {
 	}
 
 	/**
-	 * Clean up after each test.
+	 * {@inheritDoc}
 	 */
-	protected function tear_down(): void {
-		// Clean up env vars.
-		foreach ( $this->env_vars_to_clean as $key ) {
-			putenv( $key );
-		}
-		$this->env_vars_to_clean = [];
-
-		// Remove filters used in tests.
-		remove_all_filters( 'wp_headless_module_classes' );
-		remove_all_filters( 'wp_headless_module_enabled' );
-		remove_all_filters( 'wp_die_handler' );
-		remove_all_filters( 'wp_die_ajax_handler' );
-		remove_all_filters( 'wp_die_json_handler' );
-		remove_all_filters( 'wp_die_jsonp_handler' );
-		remove_all_filters( 'wp_die_xmlrpc_handler' );
-		remove_all_filters( 'wp_die_xml_handler' );
-
-		parent::tear_down();
-	}
-
-	/**
-	 * Helper to set an env var and register it for cleanup.
-	 *
-	 * @param string $key   The env var name.
-	 * @param string $value The env var value.
-	 */
-	private function set_env( string $key, string $value ): void {
-		putenv( "{$key}={$value}" );
-		$this->env_vars_to_clean[] = $key;
+	protected function get_filters_to_clean(): array {
+		return [
+			'wp_headless_module_classes',
+			'wp_headless_module_enabled',
+			'wp_die_handler',
+			'wp_die_ajax_handler',
+			'wp_die_json_handler',
+			'wp_die_jsonp_handler',
+			'wp_die_xmlrpc_handler',
+			'wp_die_xml_handler',
+		];
 	}
 
 	// -------------------------------------------------------------------------
@@ -78,6 +56,8 @@ class SettingsPageTest extends WPTestCase {
 
 	/**
 	 * Test that init() registers the admin_menu action.
+	 *
+	 * @group smoke
 	 */
 	public function test_init_registers_admin_menu_action(): void {
 		$this->settings_page->init();

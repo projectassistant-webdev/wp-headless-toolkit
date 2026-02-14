@@ -7,12 +7,15 @@
 
 namespace Tests\ProjectAssistant\HeadlessToolkit\WPUnit;
 
-use lucatume\WPBrowser\TestCase\WPTestCase;
+use Tests\ProjectAssistant\HeadlessToolkit\HeadlessToolkitTestCase;
 
 /**
  * Tests for plugin activation and deactivation callbacks.
+ *
+ * @group unit
+ * @group activation
  */
-class ActivationTest extends WPTestCase {
+class ActivationTest extends HeadlessToolkitTestCase {
 
 	/**
 	 * Set up test fixtures.
@@ -30,6 +33,8 @@ class ActivationTest extends WPTestCase {
 	 *
 	 * This validates the bug fix: the original implementation returned a callable
 	 * (closure) instead of executing the activation logic directly.
+	 *
+	 * @group smoke
 	 */
 	public function test_activation_callback_return_type_is_void(): void {
 		$reflection = new \ReflectionFunction( 'wp_headless_activation_callback' );
@@ -57,6 +62,9 @@ class ActivationTest extends WPTestCase {
 
 	/**
 	 * Test that activation callback stores the plugin version in the options table.
+	 *
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
 	 */
 	public function test_activation_callback_stores_version(): void {
 		// Ensure the option does not exist before activation.
@@ -77,6 +85,9 @@ class ActivationTest extends WPTestCase {
 
 	/**
 	 * Test that activation callback fires the wp_headless_activate action.
+	 *
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
 	 */
 	public function test_activation_callback_fires_action(): void {
 		$action_fired = false;

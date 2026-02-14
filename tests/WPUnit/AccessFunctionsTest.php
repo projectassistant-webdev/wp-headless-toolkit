@@ -7,12 +7,25 @@
 
 namespace Tests\ProjectAssistant\HeadlessToolkit\WPUnit;
 
-use lucatume\WPBrowser\TestCase\WPTestCase;
+use Tests\ProjectAssistant\HeadlessToolkit\HeadlessToolkitTestCase;
 
 /**
  * Tests for the global access functions.
+ *
+ * @group unit
+ * @group access-functions
  */
-class AccessFunctionsTest extends WPTestCase {
+class AccessFunctionsTest extends HeadlessToolkitTestCase {
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected function get_filters_to_clean(): array {
+		return [
+			'wp_headless_config_value',
+			'wp_headless_module_enabled',
+		];
+	}
 
 	/**
 	 * Clean up environment variables after each test.
@@ -21,15 +34,13 @@ class AccessFunctionsTest extends WPTestCase {
 		putenv( 'PA_TEST_ACCESS_CONFIG_KEY' );
 		putenv( 'WP_HEADLESS_DISABLE_TEST_MODULE' );
 
-		// Remove any test filters.
-		remove_all_filters( 'wp_headless_config_value' );
-		remove_all_filters( 'wp_headless_module_enabled' );
-
 		parent::tear_down();
 	}
 
 	/**
 	 * Test that wp_headless_get_config() prioritizes env var over constant and default.
+	 *
+	 * @group smoke
 	 */
 	public function test_get_config_env_priority(): void {
 		if ( ! defined( 'PA_TEST_ACCESS_CONFIG_KEY' ) ) {
@@ -87,6 +98,9 @@ class AccessFunctionsTest extends WPTestCase {
 
 	/**
 	 * Test that wp_headless_is_module_enabled() returns false when disable constant is set.
+	 *
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
 	 */
 	public function test_is_module_enabled_disable_constant(): void {
 		if ( ! defined( 'WP_HEADLESS_DISABLE_CONST_DISABLED_MOD' ) ) {
