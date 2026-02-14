@@ -11,10 +11,6 @@ vendor/
 __pycache__/
 *.py[cod]
 *$py.class
-venv/
-env/
-.venv/
-uv.lock
 
 # IDE
 # .vscode/ settings are included for team-wide optimizations
@@ -25,15 +21,6 @@ uv.lock
 *.swp
 *.swo
 *~
-
-# Claude Code
-*.local.json  # Personal settings (permissions, etc.)
-**/*.local.json
-.claude/settings.local.json
-
-# Project-specific files (not in Prism template, created per-project)
-# Note: CLAUDE.project.md is NOT ignored - it should be committed to track project config
-README.project.md
 
 # OS
 .DS_Store
@@ -46,121 +33,72 @@ Thumbs.db
 
 # Logs
 *.log
-logs/*
-!logs/codex-feedback/
+logs/
 npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Runtime data
-pids
-*.pid
-*.seed
-*.pid.lock
-
-# Coverage directory used by tools like istanbul
-coverage/
-.coverage
-
-# nyc test coverage
-.nyc_output
 
 # Build outputs
 build/
 dist/
-.next/
-out/
-
-# Database
-*.db
-*.sqlite
-*.sqlite3
 
 # Temporary files
 tmp/
 temp/
 
-# Data directories (generated data, git-ignored)
-.data/
-
-# Docker
-.dockerignore
-
-# LocalDocs generated files (can be regenerated)
-docs/*/localdocs.config.json
-docs/localdocs/  # Exported documentation from hosted LocalDocs (can be re-exported)
-
 # Secrets and credentials
 *.pem
 *.key
-!localdocs.config.json
 
 # Testing
 .pytest_cache/
 test-results/
 coverage.xml
+coverage/
+.coverage
 
 # Codeception (generated files - codeception.dist.yml is the committed template)
 codeception.yml
 tests/_output/
 
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# IPython
-profile_default/
-ipython_config.py.env
-
-# Test reports (generated)
-.reports/
-
 # Playwright MCP (browser automation state)
 .playwright-mcp/
 page-*.png
 
-# Tools - cloned repos (skills like /cloudways, /sync clone repos into tools/)
-tools/*/
-
-# Meeting frame extractions (don't commit large binaries)
-**/frames/*.png
-.ruff_cache
-supabase/
-
-# ===== PRISM ROLLOUT GITIGNORE =====
-# Entries below are synced to other projects via prism-rollout.sh
-# Run: ./scripts/rollout/sync-gitignore-manifest.sh to update sync-manifest.yml
-
-# Prism pipeline state (local runtime state, not version controlled)
-.prism/PIPELINES.json
-.prism/PIPELINES.json.*-backup
-.prism/QUEUE.json
-.prism/logs/
-.prism/*.lock
-.prism-rollout.lock
-.prism/reports/
-.prism/last-full-test-pass.json
-.prism/local-verification.json
-.prism/CURRENT_TASK.md
-.prism/screenshots/
-
-# Prism learnings and discovery (auto-generated)
-.prism/learnings/
-
-# Cross-project learnings aggregated from child projects (keep .gitkeep only)
-learnings/aggregated/*
-!learnings/aggregated/.gitkeep
-learnings/synthesis.json
-.prism/discovery/
-.prism/tasks/
-
-# Prism instruction analysis (auto-generated)
-.prism/codex_prompt.md
-.prism/instruction-analysis.json
-
-# Large media files (Fireflies recordings, screen captures, etc.)
+# Large media files
 *.mp4
 *.webm
 *.mov
 *.avi
 *.mkv
-# ===== END PRISM ROLLOUT =====
+
+# ===== PRISM INFRASTRUCTURE (parent repo only) =====
+# These directories belong in the parent (wp-headless-toolkit-builder) repo,
+# NOT in this WordPress plugin repo. Block them from ever being committed.
+.claude/
+.claude-context
+.prism/
+.prism-manifest.json
+.prism-version-config.json
+.mermaid/
+.githooks/
+.zed/
+.secrets.baseline
+.pre-commit-config.yaml
+scripts/
+docs/
+memory/
+tools/
+templates/
+hooks/
+learnings/
+CLAUDE.md
+CLAUDE.project.md
+README.prism.md
+ROADMAP.md
+PROGRESS.md
+TASK.md
+TECH-DEBT.md
+TECH-STACK.md
+TECH-STACK.template.md
+INITIAL_EXAMPLE.md
+Makefile
+*.local.json
