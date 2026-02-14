@@ -407,8 +407,8 @@ definitions:
                 exit 1
               fi
               # Use tail -1 to get the project-level <metrics> (last occurrence), not per-file metrics
-              COVERED=$(grep -oP 'coveredstatements="\K[0-9]+' tests/_output/coverage.xml | tail -1)
-              TOTAL=$(grep -oP 'statements="\K[0-9]+' tests/_output/coverage.xml | tail -1)
+              COVERED=$(sed -n 's/.*coveredstatements="\([0-9]*\)".*/\1/p' tests/_output/coverage.xml | tail -1)
+              TOTAL=$(sed -n 's/.*statements="\([0-9]*\)".*/\1/p' tests/_output/coverage.xml | tail -1)
               if [ -z "$COVERED" ] || [ -z "$TOTAL" ] || [ "$TOTAL" -le 0 ]; then
                 echo "ERROR: Could not parse coverage metrics from tests/_output/coverage.xml."
                 echo "  COVERED='${COVERED}' TOTAL='${TOTAL}'"
@@ -433,7 +433,7 @@ definitions:
         script:
           - apt-get update && apt-get install -y --no-install-recommends git
           - |
-            VERSION=$(grep -oP 'Version:\s*\K[0-9]+\.[0-9]+\.[0-9]+' wp-headless-toolkit.php)
+            VERSION=$(sed -n 's/.*Version:\s*\([0-9]*\.[0-9]*\.[0-9]*\).*/\1/p' wp-headless-toolkit.php)
             if [ -z "$VERSION" ]; then
               echo "ERROR: Could not extract version from wp-headless-toolkit.php"
               exit 1
