@@ -401,20 +401,27 @@ definitions:
               echo "All tests passed."
               # Coverage threshold check (only runs if tests passed)
               COVERAGE_THRESHOLD=60
-              if [ -f tests/_output/coverage.xml ]; then
-                # Use tail -1 to get the project-level <metrics> (last occurrence), not per-file metrics
-                COVERED=$(grep -oP 'coveredstatements="\K[0-9]+' tests/_output/coverage.xml | tail -1)
-                TOTAL=$(grep -oP 'statements="\K[0-9]+' tests/_output/coverage.xml | tail -1)
-                if [ -n "$COVERED" ] && [ -n "$TOTAL" ] && [ "$TOTAL" -gt 0 ]; then
-                  COVERAGE=$(( (COVERED * 100) / TOTAL ))
-                  echo "Coverage: ${COVERAGE}% (${COVERED}/${TOTAL} statements)"
-                  if [ "$COVERAGE" -lt "$COVERAGE_THRESHOLD" ]; then
-                    echo "FAIL: Coverage ${COVERAGE}% is below threshold ${COVERAGE_THRESHOLD}%"
-                    exit 1
-                  fi
-                  echo "PASS: Coverage ${COVERAGE}% meets threshold ${COVERAGE_THRESHOLD}%"
-                fi
+              if [ ! -f tests/_output/coverage.xml ]; then
+                echo "ERROR: Coverage report tests/_output/coverage.xml not found after tests passed."
+                echo "FAIL: Cannot verify coverage threshold without coverage report."
+                exit 1
               fi
+              # Use tail -1 to get the project-level <metrics> (last occurrence), not per-file metrics
+              COVERED=$(grep -oP 'coveredstatements="\K[0-9]+' tests/_output/coverage.xml | tail -1)
+              TOTAL=$(grep -oP 'statements="\K[0-9]+' tests/_output/coverage.xml | tail -1)
+              if [ -z "$COVERED" ] || [ -z "$TOTAL" ] || [ "$TOTAL" -le 0 ]; then
+                echo "ERROR: Could not parse coverage metrics from tests/_output/coverage.xml."
+                echo "  COVERED='${COVERED}' TOTAL='${TOTAL}'"
+                echo "FAIL: Coverage threshold check requires valid coverage data."
+                exit 1
+              fi
+              COVERAGE=$(( (COVERED * 100) / TOTAL ))
+              echo "Coverage: ${COVERAGE}% (${COVERED}/${TOTAL} statements)"
+              if [ "$COVERAGE" -lt "$COVERAGE_THRESHOLD" ]; then
+                echo "FAIL: Coverage ${COVERAGE}% is below threshold ${COVERAGE_THRESHOLD}%"
+                exit 1
+              fi
+              echo "PASS: Coverage ${COVERAGE}% meets threshold ${COVERAGE_THRESHOLD}%"
               exit 0
             fi
             echo "Tests failed - check output above."
