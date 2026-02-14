@@ -33,48 +33,44 @@ wait_for_mysql() {
 }
 
 # ---------------------------------------------------------------------------
-# Helper: Run the official WordPress entrypoint to set up wp-config.php
+# Helper: Create wp-config.php using WP-CLI (reliable in both exec and run)
 # ---------------------------------------------------------------------------
 setup_wp_config() {
-    # Copy WordPress files and generate wp-config.php.
-    # The official entrypoint only runs setup when $1 starts with "apache2"
-    # or equals "php-fpm". We call it with "apache2-foreground" as $1 so
-    # it copies files and creates wp-config.php, then we replace the exec
-    # at the end (which would start Apache) by sending it to the background
-    # briefly and killing it.
-    if [ ! -f /var/www/html/wp-config.php ]; then
-        echo "[setup] Running official WordPress entrypoint to generate wp-config.php..."
-
-        # Run the official entrypoint which copies WP files + generates wp-config.php
-        # then execs apache2-foreground. We background it and wait for wp-config.php.
-        /usr/local/bin/docker-entrypoint.sh apache2-foreground &
-        local wp_pid=$!
-
-        # Wait for wp-config.php to appear (the entrypoint creates it before exec)
-        local wait_count=0
-        while [ ! -f /var/www/html/wp-config.php ] && [ "$wait_count" -lt 60 ]; do
-            sleep 1
-            wait_count=$((wait_count + 1))
-        done
-
-        # Give it a moment to finish writing
-        sleep 2
-
-        # Kill the Apache process that was exec'd
-        kill "$wp_pid" 2>/dev/null || true
-        wait "$wp_pid" 2>/dev/null || true
-
-        if [ ! -f /var/www/html/wp-config.php ]; then
-            echo "[setup] ERROR: wp-config.php was not created after ${wait_count}s"
-            echo "[setup] Checking if WordPress files exist..."
-            ls -la /var/www/html/wp-config* 2>/dev/null || echo "[setup] No wp-config files found"
-            ls -la /var/www/html/index.php 2>/dev/null || echo "[setup] No index.php found"
-            exit 1
-        fi
-        echo "[setup] wp-config.php created successfully"
-    else
+    if [ -f /var/www/html/wp-config.php ]; then
         echo "[setup] wp-config.php already exists"
+        return 0
     fi
+
+    echo "[setup] Copying WordPress core files..."
+    # Copy WordPress core files from /usr/src/wordpress/ if not present
+    if [ ! -f /var/www/html/wp-includes/version.php ]; then
+        cp -a /usr/src/wordpress/. /var/www/html/
+        chown -R www-data:www-data /var/www/html
+    fi
+
+    # Check again -- the copy may have brought a wp-config.php from the image
+    if [ -f /var/www/html/wp-config.php ]; then
+        echo "[setup] wp-config.php was created during core file copy"
+        return 0
+    fi
+
+    echo "[setup] Creating wp-config.php via WP-CLI..."
+    wp config create \
+        --path=/var/www/html \
+        --dbname="${WORDPRESS_DB_NAME:-wordpress_test}" \
+        --dbuser="${WORDPRESS_DB_USER:-root}" \
+        --dbpass="${WORDPRESS_DB_PASSWORD:-root}" \
+        --dbhost="${WORDPRESS_DB_HOST:-mysql}" \
+        --allow-root \
+        --force \
+        --skip-check
+
+    if [ ! -f /var/www/html/wp-config.php ]; then
+        echo "[setup] ERROR: wp-config.php was not created by WP-CLI"
+        exit 1
+    fi
+
+    echo "[setup] wp-config.php created successfully"
 }
 
 # ---------------------------------------------------------------------------
@@ -201,6 +197,15 @@ main() {
     echo " WP Headless Toolkit - Docker Setup"
     echo "============================================="
 
+    # Save the original working directory (set by -w flag or Dockerfile WORKDIR)
+    local original_dir
+    original_dir="$(pwd)"
+
+    # Always run setup from WordPress root, regardless of -w flag.
+    # This prevents WP-CLI from confusing the plugin directory (which
+    # contains WordPress core files via volume mount) with the WP root.
+    cd /var/www/html
+
     wait_for_mysql
     setup_wp_config
     install_wordpress
@@ -209,10 +214,13 @@ main() {
     setup_test_library
 
     echo "============================================="
-    echo " Setup complete! Starting Apache..."
+    echo " Setup complete!"
     echo "============================================="
 
-    # Hand off to the default CMD (apache2-foreground)
+    # Restore the original working directory so the CMD runs in the right place
+    cd "$original_dir"
+
+    # Hand off to the default CMD (apache2-foreground or test command)
     exec "$@"
 }
 

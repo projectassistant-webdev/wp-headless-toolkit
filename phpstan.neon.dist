@@ -1,3 +1,6 @@
+includes:
+	- phpstan-baseline.neon
+
 parameters:
 	level: 8
 	phpVersion: 80100
@@ -17,6 +20,3 @@ parameters:
 	stubFiles:
 		- phpstan/class-wp-post-type.stub
 		- phpstan/class-wp-taxonomy.stub
-	ignoreErrors:
-		- '#Function wp_headless_get_config not found#'
-		- '#Function wp_headless_is_module_enabled not found#'

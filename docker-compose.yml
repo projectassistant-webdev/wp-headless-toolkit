@@ -25,6 +25,7 @@ services:
       WORDPRESS_ADMIN_EMAIL: ${WORDPRESS_ADMIN_EMAIL:-admin@example.com}
       WP_TESTS_DIR: ${WP_TESTS_DIR:-/tmp/wordpress-tests-lib}
       WP_TESTS_DB_NAME: ${WP_TESTS_DB_NAME:-wordpress_test}
+    working_dir: /var/www/html/wp-content/plugins/wp-headless-toolkit
     volumes:
       # Mount the entire plugin source into the WordPress plugins directory
       - .:/var/www/html/wp-content/plugins/wp-headless-toolkit
