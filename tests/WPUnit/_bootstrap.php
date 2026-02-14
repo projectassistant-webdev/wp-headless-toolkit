@@ -18,11 +18,15 @@ if ( ! isset( $_SERVER['REQUEST_URI'] ) ) {
 }
 
 // Register a shutdown function BEFORE WordPress registers shutdown_action_hook.
-// WPLoader resets $_SERVER during bootstrap, so setting it at bootstrap time
-// is not enough. This shutdown function fires first (FIFO order) and re-sets
-// $_SERVER['REQUEST_URI'] before _wp_cron() accesses it.
+// This fires first during PHP shutdown (FIFO order). Two defenses:
+// 1. restore_error_handler() removes Codeception's strict ErrorHandler so that
+//    the E_WARNING from _wp_cron() accessing $_SERVER['REQUEST_URI'] in CLI
+//    is handled by PHP's default handler (non-fatal) instead of being converted
+//    to Codeception\Exception\Warning (fatal).
+// 2. Set $_SERVER['REQUEST_URI'] in case restore_error_handler alone is not enough.
 register_shutdown_function(
 	function () {
+		restore_error_handler();
 		if ( ! isset( $_SERVER['REQUEST_URI'] ) ) {
 			$_SERVER['REQUEST_URI'] = '/';
 		}
