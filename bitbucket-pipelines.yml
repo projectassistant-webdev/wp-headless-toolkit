@@ -2,9 +2,9 @@
 # Runs PHPCS linting, PHPStan static analysis, and Codeception WPUnit tests.
 #
 # Pipeline tiers:
-#   pull-requests: parallel(lint + analyze) -> test (fast feedback)
-#   staging:       parallel(lint + analyze) -> test (same as PR)
-#   main:          parallel(lint + analyze) -> test -> tag release
+#   pull-requests: parallel(lint + analyze + test-smoke) -- fast feedback (<60s tests)
+#   staging:       parallel(lint + analyze) -> test-with-coverage (60% threshold)
+#   main:          parallel(lint + analyze) -> test -> create-release-tag
 
 definitions:
   caches:
@@ -160,6 +160,266 @@ definitions:
             echo "Tests failed - check output above."
             exit 1
 
+    - step: &test-smoke
+        name: "WPUnit Tests (Smoke + Unit)"
+        image: php:8.1-cli
+        caches:
+          - composer
+        services:
+          - mysql
+        script:
+          - export COMPOSER_ALLOW_SUPERUSER=1
+          # Increase PHP memory limit for WP-CLI extraction
+          - echo "memory_limit = 512M" > /usr/local/etc/php/conf.d/memory.ini
+          # Install system dependencies
+          - apt-get update && apt-get install -y --no-install-recommends
+            git unzip zip less mariadb-client subversion
+            libpng-dev libjpeg-dev libfreetype6-dev libzip-dev
+          # Install PHP extensions required by WordPress
+          - docker-php-ext-configure gd --with-freetype --with-jpeg
+          - docker-php-ext-install mysqli pdo pdo_mysql gd zip
+
+          # Install Composer
+          - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+          - composer install --no-interaction --prefer-dist
+
+          # Install WP-CLI
+          - curl -o /usr/local/bin/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+          - chmod +x /usr/local/bin/wp
+
+          # Wait for MySQL to be ready
+          - |
+            MYSQL_READY=false
+            for i in $(seq 1 30); do
+              if mysqladmin ping -h 127.0.0.1 -u root -proot --silent 2>/dev/null; then
+                echo "MySQL is ready (attempt $i)"
+                MYSQL_READY=true
+                break
+              fi
+              echo "Waiting for MySQL (attempt $i/30)..."
+              sleep 2
+            done
+            if [ "$MYSQL_READY" != "true" ]; then
+              echo "ERROR: MySQL failed to start after 30 attempts"
+              exit 1
+            fi
+
+          # Download and install WordPress
+          - mkdir -p /var/www/html
+          - wp core download --path=/var/www/html --allow-root
+          - wp config create
+            --path=/var/www/html
+            --dbname=wordpress_test
+            --dbuser=root
+            --dbpass=root
+            --dbhost=127.0.0.1
+            --allow-root
+          - wp db create --path=/var/www/html --allow-root 2>/dev/null || true
+          - wp core install
+            --path=/var/www/html
+            --url=http://localhost
+            --title="WP Headless Toolkit CI"
+            --admin_user=admin
+            --admin_password=admin
+            --admin_email=admin@example.com
+            --skip-email
+            --allow-root
+
+          # Install and activate WPGraphQL
+          - wp plugin install wp-graphql --version=1.27.0 --activate --path=/var/www/html --allow-root
+
+          # Link our plugin into the WordPress plugins directory
+          - ln -s "$BITBUCKET_CLONE_DIR" /var/www/html/wp-content/plugins/wp-headless-toolkit
+          - wp plugin activate wp-headless-toolkit --path=/var/www/html --allow-root
+
+          # Download WordPress test library
+          - |
+            WP_VERSION=$(wp core version --path=/var/www/html --allow-root)
+            WP_TESTS_DIR=/tmp/wordpress-tests-lib
+            mkdir -p "$WP_TESTS_DIR"
+            svn co --quiet "https://develop.svn.wordpress.org/tags/${WP_VERSION}/tests/phpunit/includes/" "${WP_TESTS_DIR}/includes"
+            svn co --quiet "https://develop.svn.wordpress.org/tags/${WP_VERSION}/tests/phpunit/data/" "${WP_TESTS_DIR}/data"
+
+          # Create wp-tests-config.php (heredoc must start at column 0)
+          - |
+            cat > /tmp/wordpress-tests-lib/wp-tests-config.php <<'WPCONFIG'
+            <?php
+            define( 'ABSPATH', '/var/www/html/' );
+            define( 'DB_NAME', 'wordpress_test' );
+            define( 'DB_USER', 'root' );
+            define( 'DB_PASSWORD', 'root' );
+            define( 'DB_HOST', '127.0.0.1' );
+            define( 'DB_CHARSET', 'utf8' );
+            define( 'DB_COLLATE', '' );
+            define( 'WP_TESTS_DOMAIN', 'localhost' );
+            define( 'WP_TESTS_EMAIL', 'admin@example.com' );
+            define( 'WP_TESTS_TITLE', 'WP Headless Toolkit CI' );
+            define( 'WP_PHP_BINARY', 'php' );
+            $table_prefix = 'wptests_';
+            WPCONFIG
+
+          # Override dbHost for CI: Bitbucket services run at 127.0.0.1, not 'mysql'
+          - cp codeception.dist.yml codeception.yml
+          - "sed -i 's/dbHost:.*mysql/dbHost: 127.0.0.1/' codeception.yml"
+
+          # Prevent WP cron shutdown fatal: _wp_cron() accesses undefined $_SERVER['REQUEST_URI'] in CLI
+          - mkdir -p /var/www/html/wp-content/mu-plugins
+          - echo '<?php remove_action("shutdown","_wp_cron",10);' > /var/www/html/wp-content/mu-plugins/disable-test-cron.php
+
+          # Run only smoke and unit test groups for fast PR feedback.
+          # Uses the same "OK (" output wrapper as the full test step.
+          - |
+            vendor/bin/codecept run wpunit --group smoke --group unit --fail-fast 2>&1 | tee /tmp/test-output.txt || true
+            if grep -q "OK (" /tmp/test-output.txt; then
+              echo ""
+              echo "All tests passed."
+              exit 0
+            fi
+            echo "Tests failed - check output above."
+            exit 1
+
+    - step: &test-with-coverage
+        name: "WPUnit Tests (Full Suite + Coverage)"
+        image: php:8.1-cli
+        caches:
+          - composer
+        services:
+          - mysql
+        artifacts:
+          - tests/_output/coverage.xml
+        script:
+          - export COMPOSER_ALLOW_SUPERUSER=1
+          # Increase PHP memory limit for WP-CLI extraction
+          - echo "memory_limit = 512M" > /usr/local/etc/php/conf.d/memory.ini
+          # Install system dependencies (includes $PHPIZE_DEPS for pcov compilation)
+          - apt-get update && apt-get install -y --no-install-recommends
+            git unzip zip less mariadb-client subversion
+            libpng-dev libjpeg-dev libfreetype6-dev libzip-dev
+            $PHPIZE_DEPS
+          # Install PHP extensions required by WordPress
+          - docker-php-ext-configure gd --with-freetype --with-jpeg
+          - docker-php-ext-install mysqli pdo pdo_mysql gd zip
+
+          # Install pcov for code coverage (staging only)
+          - pecl install pcov && docker-php-ext-enable pcov
+          - echo "pcov.directory=/var/www/html/wp-content/plugins/wp-headless-toolkit/src" >> /usr/local/etc/php/conf.d/pcov.ini
+
+          # Install Composer
+          - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+          - composer install --no-interaction --prefer-dist
+
+          # Install WP-CLI
+          - curl -o /usr/local/bin/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+          - chmod +x /usr/local/bin/wp
+
+          # Wait for MySQL to be ready
+          - |
+            MYSQL_READY=false
+            for i in $(seq 1 30); do
+              if mysqladmin ping -h 127.0.0.1 -u root -proot --silent 2>/dev/null; then
+                echo "MySQL is ready (attempt $i)"
+                MYSQL_READY=true
+                break
+              fi
+              echo "Waiting for MySQL (attempt $i/30)..."
+              sleep 2
+            done
+            if [ "$MYSQL_READY" != "true" ]; then
+              echo "ERROR: MySQL failed to start after 30 attempts"
+              exit 1
+            fi
+
+          # Download and install WordPress
+          - mkdir -p /var/www/html
+          - wp core download --path=/var/www/html --allow-root
+          - wp config create
+            --path=/var/www/html
+            --dbname=wordpress_test
+            --dbuser=root
+            --dbpass=root
+            --dbhost=127.0.0.1
+            --allow-root
+          - wp db create --path=/var/www/html --allow-root 2>/dev/null || true
+          - wp core install
+            --path=/var/www/html
+            --url=http://localhost
+            --title="WP Headless Toolkit CI"
+            --admin_user=admin
+            --admin_password=admin
+            --admin_email=admin@example.com
+            --skip-email
+            --allow-root
+
+          # Install and activate WPGraphQL
+          - wp plugin install wp-graphql --version=1.27.0 --activate --path=/var/www/html --allow-root
+
+          # Link our plugin into the WordPress plugins directory
+          - ln -s "$BITBUCKET_CLONE_DIR" /var/www/html/wp-content/plugins/wp-headless-toolkit
+          - wp plugin activate wp-headless-toolkit --path=/var/www/html --allow-root
+
+          # Download WordPress test library
+          - |
+            WP_VERSION=$(wp core version --path=/var/www/html --allow-root)
+            WP_TESTS_DIR=/tmp/wordpress-tests-lib
+            mkdir -p "$WP_TESTS_DIR"
+            svn co --quiet "https://develop.svn.wordpress.org/tags/${WP_VERSION}/tests/phpunit/includes/" "${WP_TESTS_DIR}/includes"
+            svn co --quiet "https://develop.svn.wordpress.org/tags/${WP_VERSION}/tests/phpunit/data/" "${WP_TESTS_DIR}/data"
+
+          # Create wp-tests-config.php (heredoc must start at column 0)
+          - |
+            cat > /tmp/wordpress-tests-lib/wp-tests-config.php <<'WPCONFIG'
+            <?php
+            define( 'ABSPATH', '/var/www/html/' );
+            define( 'DB_NAME', 'wordpress_test' );
+            define( 'DB_USER', 'root' );
+            define( 'DB_PASSWORD', 'root' );
+            define( 'DB_HOST', '127.0.0.1' );
+            define( 'DB_CHARSET', 'utf8' );
+            define( 'DB_COLLATE', '' );
+            define( 'WP_TESTS_DOMAIN', 'localhost' );
+            define( 'WP_TESTS_EMAIL', 'admin@example.com' );
+            define( 'WP_TESTS_TITLE', 'WP Headless Toolkit CI' );
+            define( 'WP_PHP_BINARY', 'php' );
+            $table_prefix = 'wptests_';
+            WPCONFIG
+
+          # Override dbHost for CI: Bitbucket services run at 127.0.0.1, not 'mysql'
+          - cp codeception.dist.yml codeception.yml
+          - "sed -i 's/dbHost:.*mysql/dbHost: 127.0.0.1/' codeception.yml"
+
+          # Prevent WP cron shutdown fatal: _wp_cron() accesses undefined $_SERVER['REQUEST_URI'] in CLI
+          - mkdir -p /var/www/html/wp-content/mu-plugins
+          - echo '<?php remove_action("shutdown","_wp_cron",10);' > /var/www/html/wp-content/mu-plugins/disable-test-cron.php
+
+          # Run Codeception WPUnit tests with coverage.
+          # Uses the same "OK (" output wrapper as the full test step.
+          # Coverage threshold check runs only after tests pass.
+          - |
+            vendor/bin/codecept run wpunit --fail-fast --coverage --coverage-xml 2>&1 | tee /tmp/test-output.txt || true
+            if grep -q "OK (" /tmp/test-output.txt; then
+              echo ""
+              echo "All tests passed."
+              # Coverage threshold check (only runs if tests passed)
+              COVERAGE_THRESHOLD=60
+              if [ -f tests/_output/coverage.xml ]; then
+                # Use tail -1 to get the project-level <metrics> (last occurrence), not per-file metrics
+                COVERED=$(grep -oP 'coveredstatements="\K[0-9]+' tests/_output/coverage.xml | tail -1)
+                TOTAL=$(grep -oP 'statements="\K[0-9]+' tests/_output/coverage.xml | tail -1)
+                if [ -n "$COVERED" ] && [ -n "$TOTAL" ] && [ "$TOTAL" -gt 0 ]; then
+                  COVERAGE=$(( (COVERED * 100) / TOTAL ))
+                  echo "Coverage: ${COVERAGE}% (${COVERED}/${TOTAL} statements)"
+                  if [ "$COVERAGE" -lt "$COVERAGE_THRESHOLD" ]; then
+                    echo "FAIL: Coverage ${COVERAGE}% is below threshold ${COVERAGE_THRESHOLD}%"
+                    exit 1
+                  fi
+                  echo "PASS: Coverage ${COVERAGE}% meets threshold ${COVERAGE_THRESHOLD}%"
+                fi
+              fi
+              exit 0
+            fi
+            echo "Tests failed - check output above."
+            exit 1
+
     - step: &create-release-tag
         name: "Create Release Tag"
         image: php:8.1-cli
@@ -188,14 +448,14 @@ pipelines:
       - parallel:
           - step: *lint
           - step: *analyze
-      - step: *test
+          - step: *test-smoke
 
   branches:
     staging:
       - parallel:
           - step: *lint
           - step: *analyze
-      - step: *test
+      - step: *test-with-coverage
     main:
       - parallel:
           - step: *lint
