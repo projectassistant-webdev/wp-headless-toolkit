@@ -1,0 +1,135 @@
+<?php
+
+/**
+ * PHPStan stub for WP_Post_Type.
+ *
+ * @phpstan-type WP_Post_Type_Labels object{
+ *   name: string,
+ *   singular_name: string,
+ *   add_new: string,
+ *   add_new_item: string,
+ *   edit_item: string,
+ *   new_item: string,
+ *   view_item: string,
+ *   view_items: string,
+ *   search_items: string,
+ *   not_found: string,
+ *   not_found_in_trash: string,
+ *   parent_item_colon: string,
+ *   all_items: string,
+ *   archives: string,
+ *   attributes: string,
+ *   insert_into_item: string,
+ *   uploaded_to_this_item: string,
+ *   featured_image: string,
+ *   set_featured_image: string,
+ *   remove_featured_image: string,
+ *   use_featured_image: string,
+ *   menu_name: string,
+ *   filter_items_list: string,
+ *   filter_by_date: string,
+ *   items_list_navigation: string,
+ *   items_list: string,
+ *   item_published: string,
+ *   item_published_privately: string,
+ *   item_reverted_to_draft: string,
+ *   item_scheduled: string,
+ *   item_updated: string,
+ *   item_link: string,
+ *   item_link_description: string,
+ * }
+ */
+class WP_Post_Type {
+	/** @var string */
+	public $name;
+
+	/** @var string */
+	public $label;
+
+	/** @var object */
+	public $labels;
+
+	/** @var string */
+	public $description;
+
+	/** @var bool */
+	public $public;
+
+	/** @var bool */
+	public $hierarchical;
+
+	/** @var bool */
+	public $exclude_from_search;
+
+	/** @var bool */
+	public $publicly_queryable;
+
+	/** @var bool */
+	public $show_ui;
+
+	/** @var bool */
+	public $show_in_menu;
+
+	/** @var bool */
+	public $show_in_nav_menus;
+
+	/** @var bool */
+	public $show_in_admin_bar;
+
+	/** @var int */
+	public $menu_position;
+
+	/** @var string */
+	public $menu_icon;
+
+	/** @var string */
+	public $capability_type;
+
+	/** @var bool */
+	public $map_meta_cap;
+
+	/** @var string */
+	public $register_meta_box_cb;
+
+	/** @var string[] */
+	public $taxonomies;
+
+	/** @var bool */
+	public $has_archive;
+
+	/** @var bool|string */
+	public $query_var;
+
+	/** @var bool */
+	public $can_export;
+
+	/** @var bool */
+	public $delete_with_user;
+
+	/** @var bool */
+	public $show_in_rest;
+
+	/** @var string */
+	public $rest_base;
+
+	/** @var string */
+	public $rest_namespace;
+
+	/** @var string */
+	public $rest_controller_class;
+
+	/** @var object */
+	public $cap;
+
+	/** @var array<string, mixed>|false */
+	public $rewrite;
+
+	/** @var array<int, string>|false */
+	public $supports;
+
+	/** @var bool */
+	public $_builtin;
+
+	/** @var string */
+	public $_edit_link;
+}

@@ -1,0 +1,83 @@
+# Changelog
+
+All notable changes to the WP Headless Toolkit plugin will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+---
+
+## [1.3.0] - 2026-02-13
+
+### Changed
+- Renamed Composer package from `projectassistant/wordpress-headless-toolkit` to `projectassistant/wp-headless-toolkit`
+- Updated all internal references to match new package name
+
+### Fixed
+- CI pipeline compatibility improvements for Bitbucket Pipelines
+
+---
+
+## [1.2.0] - 2026-02-12
+
+### Added
+- Tiered test execution with `@group smoke` markers for fast CI feedback
+- Coverage reporting with configurable threshold enforcement
+- PR smoke test step in CI pipeline
+
+### Changed
+- Extracted shared test infrastructure into base class and traits
+- Added `@group` annotations to all 16 test classes
+- Added `declare(strict_types=1)` to all source files (17 files total)
+
+### Fixed
+- Coverage threshold now fails closed on missing or unparseable `coverage.xml`
+
+---
+
+## [1.1.0] - 2026-02-11
+
+### Added
+- Bitbucket Pipelines CI configuration with parallel lint, analyze, and test steps
+- Release tagging automation in CI
+
+### Fixed
+- CI compatibility: REQUEST_URI, WP cron shutdown, ANSI color handling, pcov detection
+- oEmbed discovery link removal now detects hook priority for cross-version WordPress compatibility
+
+---
+
+## [1.0.0] - 2026-02-10
+
+### Added
+- **Security Headers module** -- X-Content-Type-Options, X-Frame-Options, HSTS, Referrer-Policy, Permissions-Policy (disabled by default)
+- **Preview Mode module** -- JWT-based preview link rewriting for authenticated draft access
+- **WP Migrate DB Compatibility module** -- Ensures WP Migrate DB endpoints bypass REST API filtering
+- **CORS module** -- Configurable CORS headers with origin allowlist
+- **GraphQL Performance module** -- Cache-control headers, object cache integration, query complexity limits
+- **Admin Settings page** -- Display-only settings page showing module status and environment configuration
+- Deployment documentation and installation validation script (`bin/validate-installation.php`)
+- Comprehensive WPUnit test suite (337 tests across 16 test classes)
+
+### Security
+- REST API returns `WP_Error` for blocked routes instead of empty array (TD-SEC-001)
+- CORS module sanitizes `HTTP_ORIGIN` and `REQUEST_URI` (TD-SEC-002, TD-SEC-003)
+- Settings page enforces `manage_options` capability check (TD-SEC-005)
+- `do_action` calls moved inside singleton guard to prevent double-firing (TD-QA-004)
+
+---
+
+## [0.1.0] - 2026-02-08
+
+### Added
+- Initial plugin scaffold with modular architecture
+- **ISR Revalidation module** -- Triggers Next.js on-demand revalidation on content changes
+- **REST API Security module** -- Filters REST API to only expose headless-required endpoints
+- **Head Cleanup module** -- Removes emoji scripts, oEmbed, RSD, WLW manifest, shortlinks
+- **Frontend Redirect module** -- Redirects public visitors to headless frontend
+- Environment-variable-based configuration with zero database writes
+- `ModuleInterface` contract for consistent module architecture
+- `Config` helper supporting `.env`, `wp-config.php` constants, and filter overrides
+- Plugin lifecycle hooks: `wp_headless_modules_loaded`, `wp_headless_init`
+- Module control filters: `wp_headless_module_enabled`, `wp_headless_module_classes`
+- Docker-based development and testing environment

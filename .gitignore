@@ -1,0 +1,104 @@
+# Environment Variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Dependencies
+node_modules/
+vendor/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# IDE
+# .vscode/ settings are included for team-wide optimizations
+.vscode/*
+!.vscode/settings.json
+!.vscode/settings-*.json
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+
+# Build outputs
+build/
+dist/
+
+# Temporary files
+tmp/
+temp/
+
+# Secrets and credentials
+*.pem
+*.key
+
+# Testing
+.pytest_cache/
+test-results/
+coverage.xml
+coverage/
+.coverage
+
+# Codeception (generated files - codeception.dist.yml is the committed template)
+codeception.yml
+tests/_output/
+
+# Playwright MCP (browser automation state)
+.playwright-mcp/
+page-*.png
+
+# Large media files
+*.mp4
+*.webm
+*.mov
+*.avi
+*.mkv
+
+# ===== PRISM INFRASTRUCTURE (parent repo only) =====
+# These directories belong in the parent (wp-headless-toolkit-builder) repo,
+# NOT in this WordPress plugin repo. Block them from ever being committed.
+.claude/
+.claude-context
+.prism/
+.prism-manifest.json
+.prism-version-config.json
+.mermaid/
+.githooks/
+.zed/
+.secrets.baseline
+.pre-commit-config.yaml
+scripts/
+docs/
+memory/
+tools/
+templates/
+hooks/
+learnings/
+CLAUDE.md
+CLAUDE.project.md
+README.prism.md
+ROADMAP.md
+PROGRESS.md
+TASK.md
+TECH-DEBT.md
+TECH-STACK.md
+TECH-STACK.template.md
+INITIAL_EXAMPLE.md
+Makefile
+*.local.json
