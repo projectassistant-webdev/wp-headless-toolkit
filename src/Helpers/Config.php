@@ -50,7 +50,7 @@ class Config {
 	 * Get a list configuration value (comma-separated string to array).
 	 *
 	 * @param string $key     The configuration key.
-	 * @param array  $default The default value.
+	 * @param string[] $default The default value.
 	 *
 	 * @return string[]
 	 */

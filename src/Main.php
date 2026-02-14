@@ -30,7 +30,7 @@ if ( ! class_exists( 'ProjectAssistant\HeadlessToolkit\Main' ) ) :
 		 *
 		 * @var ?self $instance
 		 */
-		private static $instance;
+		private static ?self $instance = null;
 
 		/**
 		 * Loaded module instances.
