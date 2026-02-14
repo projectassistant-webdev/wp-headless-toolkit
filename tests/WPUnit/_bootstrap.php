@@ -17,6 +17,18 @@ if ( ! isset( $_SERVER['REQUEST_URI'] ) ) {
 	$_SERVER['REQUEST_URI'] = '/';
 }
 
+// Register a shutdown function BEFORE WordPress registers shutdown_action_hook.
+// WPLoader resets $_SERVER during bootstrap, so setting it at bootstrap time
+// is not enough. This shutdown function fires first (FIFO order) and re-sets
+// $_SERVER['REQUEST_URI'] before _wp_cron() accesses it.
+register_shutdown_function(
+	function () {
+		if ( ! isset( $_SERVER['REQUEST_URI'] ) ) {
+			$_SERVER['REQUEST_URI'] = '/';
+		}
+	}
+);
+
 // Ensure the plugin's access functions are available.
 require_once dirname( __DIR__, 2 ) . '/access-functions.php';
 

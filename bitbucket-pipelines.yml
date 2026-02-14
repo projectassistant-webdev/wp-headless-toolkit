@@ -141,6 +141,10 @@ definitions:
           - cp codeception.dist.yml codeception.yml
           - "sed -i 's/dbHost:.*mysql/dbHost: 127.0.0.1/' codeception.yml"
 
+          # Prevent WP cron shutdown fatal: _wp_cron() accesses undefined $_SERVER['REQUEST_URI'] in CLI
+          - mkdir -p /var/www/html/wp-content/mu-plugins
+          - echo '<?php remove_action("shutdown","_wp_cron",10);' > /var/www/html/wp-content/mu-plugins/disable-test-cron.php
+
           # Run Codeception WPUnit tests with fail-fast for quicker feedback
           - vendor/bin/codecept run wpunit --fail-fast
 
