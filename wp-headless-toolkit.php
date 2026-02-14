@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Plugin Name: WP Headless Toolkit
  * Plugin URI: https://bitbucket.org/projectassistant/wordpress-headless-toolkit
