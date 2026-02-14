@@ -11,6 +11,9 @@ use Tests\ProjectAssistant\HeadlessToolkit\HeadlessToolkitTestCase;
 
 /**
  * Tests for plugin activation and deactivation callbacks.
+ *
+ * @group unit
+ * @group activation
  */
 class ActivationTest extends HeadlessToolkitTestCase {
 
@@ -57,6 +60,9 @@ class ActivationTest extends HeadlessToolkitTestCase {
 
 	/**
 	 * Test that activation callback stores the plugin version in the options table.
+	 *
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
 	 */
 	public function test_activation_callback_stores_version(): void {
 		// Ensure the option does not exist before activation.
@@ -77,6 +83,9 @@ class ActivationTest extends HeadlessToolkitTestCase {
 
 	/**
 	 * Test that activation callback fires the wp_headless_activate action.
+	 *
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
 	 */
 	public function test_activation_callback_fires_action(): void {
 		$action_fired = false;

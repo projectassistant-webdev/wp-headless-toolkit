@@ -11,6 +11,9 @@ use Tests\ProjectAssistant\HeadlessToolkit\HeadlessToolkitTestCase;
 
 /**
  * Tests for the global access functions.
+ *
+ * @group unit
+ * @group access-functions
  */
 class AccessFunctionsTest extends HeadlessToolkitTestCase {
 
@@ -93,6 +96,9 @@ class AccessFunctionsTest extends HeadlessToolkitTestCase {
 
 	/**
 	 * Test that wp_headless_is_module_enabled() returns false when disable constant is set.
+	 *
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
 	 */
 	public function test_is_module_enabled_disable_constant(): void {
 		if ( ! defined( 'WP_HEADLESS_DISABLE_CONST_DISABLED_MOD' ) ) {

@@ -18,10 +18,17 @@ use ProjectAssistant\HeadlessToolkit\Modules\RestSecurity\RestSecurity;
 use ProjectAssistant\HeadlessToolkit\Modules\FrontendRedirect\FrontendRedirect;
 use ProjectAssistant\HeadlessToolkit\Modules\MigrateDbCompat\MigrateDbCompat;
 use ProjectAssistant\HeadlessToolkit\Modules\HeadCleanup\HeadCleanup;
+use ProjectAssistant\HeadlessToolkit\Modules\Cors\Cors;
+use ProjectAssistant\HeadlessToolkit\Modules\SecurityHeaders\SecurityHeaders;
+use ProjectAssistant\HeadlessToolkit\Modules\GraphqlPerformance\GraphqlPerformance;
+use ProjectAssistant\HeadlessToolkit\Admin\SettingsPage;
 use ProjectAssistant\HeadlessToolkit\Helpers\Config;
 
 /**
  * Tests for Composer distribution and CI readiness.
+ *
+ * @group integration
+ * @group composer
  */
 class ComposerCiTest extends HeadlessToolkitTestCase {
 
@@ -104,11 +111,15 @@ class ComposerCiTest extends HeadlessToolkitTestCase {
 	 */
 	public static function module_class_provider(): array {
 		return [
-			'Revalidation'     => [ Revalidation::class ],
-			'RestSecurity'     => [ RestSecurity::class ],
-			'FrontendRedirect' => [ FrontendRedirect::class ],
-			'MigrateDbCompat'  => [ MigrateDbCompat::class ],
-			'HeadCleanup'      => [ HeadCleanup::class ],
+			'Revalidation'       => [ Revalidation::class ],
+			'RestSecurity'       => [ RestSecurity::class ],
+			'FrontendRedirect'   => [ FrontendRedirect::class ],
+			'MigrateDbCompat'    => [ MigrateDbCompat::class ],
+			'HeadCleanup'        => [ HeadCleanup::class ],
+			'Cors'               => [ Cors::class ],
+			'SecurityHeaders'    => [ SecurityHeaders::class ],
+			'GraphqlPerformance' => [ GraphqlPerformance::class ],
+			'SettingsPage'       => [ SettingsPage::class ],
 		];
 	}
 

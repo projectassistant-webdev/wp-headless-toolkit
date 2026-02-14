@@ -12,6 +12,9 @@ use ProjectAssistant\HeadlessToolkit\Modules\HeadCleanup\HeadCleanup;
 
 /**
  * Tests for the HeadCleanup module.
+ *
+ * @group module
+ * @group head-cleanup
  */
 class HeadCleanupTest extends HeadlessToolkitTestCase {
 

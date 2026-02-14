@@ -13,6 +13,9 @@ use ProjectAssistant\HeadlessToolkit\Modules\ModuleInterface;
 
 /**
  * Tests for the Security Headers module.
+ *
+ * @group module
+ * @group security-headers
  */
 class SecurityHeadersTest extends HeadlessToolkitTestCase {
 

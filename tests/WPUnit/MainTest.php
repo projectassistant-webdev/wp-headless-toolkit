@@ -14,6 +14,9 @@ use ProjectAssistant\HeadlessToolkit\Modules\MigrateDbCompat\MigrateDbCompat;
 
 /**
  * Tests for the Main singleton and module loader.
+ *
+ * @group unit
+ * @group main
  */
 class MainTest extends HeadlessToolkitTestCase {
 
@@ -42,6 +45,8 @@ class MainTest extends HeadlessToolkitTestCase {
 
 	/**
 	 * Test that Main::instance() returns the same instance on repeated calls.
+	 *
+	 * @group smoke
 	 */
 	public function test_instance_returns_singleton(): void {
 		$instance1 = Main::instance();
@@ -52,6 +57,8 @@ class MainTest extends HeadlessToolkitTestCase {
 
 	/**
 	 * Test that Main::instance() returns an instance of Main.
+	 *
+	 * @group smoke
 	 */
 	public function test_instance_returns_main_class(): void {
 		$instance = Main::instance();
@@ -65,6 +72,8 @@ class MainTest extends HeadlessToolkitTestCase {
 	 * Note: In the test environment, most modules' is_enabled() returns false
 	 * because their dependencies are not present. We verify modules array is
 	 * populated by filtering in a simple test module.
+	 *
+	 * @group smoke
 	 */
 	public function test_load_modules_registers_default_modules(): void {
 		// Filter module classes to only include MigrateDbCompat (we can control its enablement).
@@ -124,12 +133,8 @@ class MainTest extends HeadlessToolkitTestCase {
 	/**
 	 * Test that get_module returns a module by slug when it is loaded.
 	 *
-	 * NOTE: This test defines the WPMDB_PRO_VERSION constant, which persists for
-	 * the lifetime of the PHP process. Tests that assert MigrateDbCompat is
-	 * disabled (e.g. test_load_modules_skips_disabled_modules) must run BEFORE
-	 * this test. PHPUnit runs tests in declaration order by default, so the
-	 * current ordering is intentional. Do not reorder without accounting for
-	 * this constant-leakage side effect.
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
 	 */
 	public function test_get_module_returns_module_by_slug(): void {
 		// Define the constant so MigrateDbCompat::is_enabled() returns true.
@@ -221,6 +226,8 @@ class MainTest extends HeadlessToolkitTestCase {
 
 	/**
 	 * Test that wp_headless_modules_loaded action fires with module array.
+	 *
+	 * @group smoke
 	 */
 	public function test_wp_headless_modules_loaded_action_fires(): void {
 		$received_modules = null;

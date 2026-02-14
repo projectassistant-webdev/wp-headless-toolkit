@@ -13,6 +13,9 @@ use ProjectAssistant\HeadlessToolkit\Main;
 
 /**
  * Tests for the SettingsPage admin page.
+ *
+ * @group module
+ * @group settings-page
  */
 class SettingsPageTest extends HeadlessToolkitTestCase {
 

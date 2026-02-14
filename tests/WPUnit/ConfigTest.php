@@ -12,6 +12,9 @@ use ProjectAssistant\HeadlessToolkit\Helpers\Config;
 
 /**
  * Tests for the Config helper class.
+ *
+ * @group unit
+ * @group config
  */
 class ConfigTest extends HeadlessToolkitTestCase {
 

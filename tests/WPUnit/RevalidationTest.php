@@ -12,6 +12,9 @@ use ProjectAssistant\HeadlessToolkit\Modules\Revalidation\Revalidation;
 
 /**
  * Tests for the Revalidation module.
+ *
+ * @group module
+ * @group revalidation
  */
 class RevalidationTest extends HeadlessToolkitTestCase {
 

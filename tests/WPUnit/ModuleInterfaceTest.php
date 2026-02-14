@@ -13,6 +13,9 @@ use ProjectAssistant\HeadlessToolkit\Modules\MigrateDbCompat\MigrateDbCompat;
 
 /**
  * Tests for the ModuleInterface contract.
+ *
+ * @group unit
+ * @group module-interface
  */
 class ModuleInterfaceTest extends HeadlessToolkitTestCase {
 

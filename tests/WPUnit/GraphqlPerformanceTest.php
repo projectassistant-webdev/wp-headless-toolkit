@@ -13,6 +13,9 @@ use ProjectAssistant\HeadlessToolkit\Modules\ModuleInterface;
 
 /**
  * Tests for the GraphqlPerformance module.
+ *
+ * @group module
+ * @group graphql-performance
  */
 class GraphqlPerformanceTest extends HeadlessToolkitTestCase {
 

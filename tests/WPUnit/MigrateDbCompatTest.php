@@ -12,6 +12,9 @@ use ProjectAssistant\HeadlessToolkit\Modules\MigrateDbCompat\MigrateDbCompat;
 
 /**
  * Tests for the MigrateDbCompat module.
+ *
+ * @group module
+ * @group migrate-db-compat
  */
 class MigrateDbCompatTest extends HeadlessToolkitTestCase {
 
@@ -51,6 +54,9 @@ class MigrateDbCompatTest extends HeadlessToolkitTestCase {
 
 	/**
 	 * Test that is_enabled() returns true when WPMDB_PRO_VERSION is defined.
+	 *
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
 	 */
 	public function test_is_enabled_with_wpmdb_constant(): void {
 		// WPMDB_PRO_VERSION may already be defined from MainTest.

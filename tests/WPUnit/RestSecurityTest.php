@@ -12,6 +12,9 @@ use ProjectAssistant\HeadlessToolkit\Modules\RestSecurity\RestSecurity;
 
 /**
  * Tests for the RestSecurity module.
+ *
+ * @group module
+ * @group rest-security
  */
 class RestSecurityTest extends HeadlessToolkitTestCase {
 

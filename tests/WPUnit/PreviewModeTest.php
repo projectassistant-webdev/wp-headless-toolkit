@@ -13,6 +13,9 @@ use ProjectAssistant\HeadlessToolkit\Modules\ModuleInterface;
 
 /**
  * Tests for the Preview Mode module.
+ *
+ * @group module
+ * @group preview-mode
  */
 class PreviewModeTest extends HeadlessToolkitTestCase {
 

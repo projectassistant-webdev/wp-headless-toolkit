@@ -13,6 +13,9 @@ use ProjectAssistant\HeadlessToolkit\Modules\ModuleInterface;
 
 /**
  * Tests for the CORS module.
+ *
+ * @group module
+ * @group cors
  */
 class CorsTest extends HeadlessToolkitTestCase {
 

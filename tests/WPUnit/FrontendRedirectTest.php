@@ -13,11 +13,8 @@ use ProjectAssistant\HeadlessToolkit\Modules\FrontendRedirect\FrontendRedirect;
 /**
  * Tests for the FrontendRedirect module.
  *
- * IMPORTANT: Test method order matters. Tests that define PHP constants
- * (WP_CLI, REST_REQUEST, DOING_AJAX, DOING_CRON, GRAPHQL_HTTP_REQUEST)
- * are placed LAST because constants cannot be undefined once set and would
- * cause all subsequent redirect tests to fail (is_passthrough_request()
- * would always return true).
+ * @group module
+ * @group frontend-redirect
  */
 class FrontendRedirectTest extends HeadlessToolkitTestCase {
 
@@ -528,32 +525,13 @@ class FrontendRedirectTest extends HeadlessToolkitTestCase {
 	}
 
 	// -------------------------------------------------------------------
-	// 7. Passthrough Tests (constant-defining -- MUST run LAST)
-	// -------------------------------------------------------------------
-	//
-	// WARNING - EXECUTION ORDER DEPENDENCY:
-	//
-	// These tests define PHP constants (WP_CLI, REST_REQUEST, DOING_AJAX,
-	// DOING_CRON, GRAPHQL_HTTP_REQUEST) that persist for the lifetime of
-	// the PHP process. PHP constants cannot be undefined or redefined
-	// once set.
-	//
-	// Because is_passthrough_request() checks these constants, defining
-	// them as `true` causes ALL subsequent calls to maybe_redirect() to
-	// return early (passthrough). If these tests ran before the redirect
-	// behavior tests in sections 4-6, those tests would never trigger a
-	// redirect and would produce false positives.
-	//
-	// PHPUnit (and Codeception wpunit) executes test methods in the order
-	// they appear in the file. This section MUST remain at the end of the
-	// class to guarantee correct behaviour.
-	//
-	// DO NOT move these tests above the redirect behavior tests.
-	// DO NOT add new redirect behavior tests after this section.
+	// 7. Passthrough Tests (constant-defining -- run in separate process)
 	// -------------------------------------------------------------------
 
 	/**
 	 * @test
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
 	 */
 	public function test_maybe_redirect_skips_for_wp_cli_request(): void {
 		if ( defined( 'WP_CLI' ) ) {
@@ -580,6 +558,8 @@ class FrontendRedirectTest extends HeadlessToolkitTestCase {
 
 	/**
 	 * @test
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
 	 */
 	public function test_maybe_redirect_skips_for_rest_request(): void {
 		if ( defined( 'REST_REQUEST' ) ) {
@@ -606,6 +586,8 @@ class FrontendRedirectTest extends HeadlessToolkitTestCase {
 
 	/**
 	 * @test
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
 	 */
 	public function test_maybe_redirect_skips_for_ajax_request(): void {
 		if ( defined( 'DOING_AJAX' ) ) {
@@ -632,6 +614,8 @@ class FrontendRedirectTest extends HeadlessToolkitTestCase {
 
 	/**
 	 * @test
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
 	 */
 	public function test_maybe_redirect_skips_for_cron_request(): void {
 		if ( defined( 'DOING_CRON' ) ) {
@@ -658,6 +642,8 @@ class FrontendRedirectTest extends HeadlessToolkitTestCase {
 
 	/**
 	 * @test
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
 	 */
 	public function test_maybe_redirect_skips_for_graphql_request(): void {
 		if ( defined( 'GRAPHQL_HTTP_REQUEST' ) ) {
