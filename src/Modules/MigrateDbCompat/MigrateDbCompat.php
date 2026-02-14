@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * WP Migrate DB Pro Compatibility Module
  *
