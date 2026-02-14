@@ -152,7 +152,7 @@ definitions:
           # output: "OK (" only appears when ALL tests pass.
           - |
             vendor/bin/codecept run wpunit --fail-fast 2>&1 | tee /tmp/test-output.txt || true
-            if grep -q "^OK (" /tmp/test-output.txt; then
+            if grep -q "OK (" /tmp/test-output.txt; then
               echo ""
               echo "All tests passed."
               exit 0
