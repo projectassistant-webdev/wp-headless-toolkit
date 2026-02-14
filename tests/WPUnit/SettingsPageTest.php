@@ -487,7 +487,7 @@ class SettingsPageTest extends HeadlessToolkitTestCase {
 
 		$this->assertStringContainsString( 'Documentation', $output, 'Rendered page should contain Documentation heading' );
 		$this->assertStringContainsString(
-			'https://bitbucket.org/projectassistant/wordpress-headless-toolkit',
+			'https://bitbucket.org/projectassistant/wp-headless-toolkit',
 			$output,
 			'Rendered page should contain documentation link'
 		);

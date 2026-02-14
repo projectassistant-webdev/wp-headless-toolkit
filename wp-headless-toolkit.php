@@ -2,7 +2,7 @@
 declare(strict_types=1);
 /**
  * Plugin Name: WP Headless Toolkit
- * Plugin URI: https://bitbucket.org/projectassistant/wordpress-headless-toolkit
+ * Plugin URI: https://bitbucket.org/projectassistant/wp-headless-toolkit
  * Description: Unified headless WordPress plugin for Next.js projects - ISR revalidation, REST security, CORS, preview mode, and more.
  * Author: Project Assistant
  * Author URI: https://projectassistant.org
