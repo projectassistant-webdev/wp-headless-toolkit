@@ -121,10 +121,10 @@ class WP_Post_Type {
 	/** @var object */
 	public $cap;
 
-	/** @var array|false */
+	/** @var array<string, mixed>|false */
 	public $rewrite;
 
-	/** @var array|false */
+	/** @var array<int, string>|false */
 	public $supports;
 
 	/** @var bool */
