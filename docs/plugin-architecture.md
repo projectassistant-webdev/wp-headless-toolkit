@@ -22,7 +22,7 @@ The bootstrap file (`wp-headless-toolkit.php`) defines the following constants d
 
 | Constant | Description |
 |----------|-------------|
-| `WP_HEADLESS_VERSION` | Current plugin version (e.g., `1.4.0`) |
+| `WP_HEADLESS_VERSION` | Current plugin version (e.g., `1.5.0`) |
 | `WP_HEADLESS_PLUGIN_DIR` | Absolute path to the plugin directory |
 | `WP_HEADLESS_PLUGIN_URL` | URL to the plugin directory |
 | `WP_HEADLESS_PLUGIN_FILE` | Path to the main plugin file |
