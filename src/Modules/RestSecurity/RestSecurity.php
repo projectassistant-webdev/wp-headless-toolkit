@@ -114,6 +114,7 @@ class RestSecurity implements ModuleInterface {
 			'/wp/v2/settings',
 			'/wpgraphql/',
 			'/batch/v1',
+			'/wp-headless-toolkit/',
 		] );
 
 		foreach ( $allowed_prefixes as $prefix ) {
