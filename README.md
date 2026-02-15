@@ -345,6 +345,29 @@ wp-headless-toolkit/
     validate-installation.php   # Installation validation script
 ```
 
+## Documentation
+
+### Architecture
+
+- [Plugin Architecture](docs/plugin-architecture.md) -- Modular design, configuration system, module lifecycle, and extending the plugin
+
+### Module Guides
+
+- [ISR Revalidation](docs/isr-revalidation.md) -- Tag-based Next.js cache revalidation on content changes
+- [Cloudflare Purge](docs/cloudflare-purge.md) -- CDN and GraphQL object cache purging via Breeze
+- [REST API Security](docs/rest-api-security.md) -- Endpoint filtering and user enumeration protection
+- [Frontend Redirect](docs/frontend-redirect.md) -- 301 redirects from WordPress to your Next.js frontend
+- [Head Cleanup](docs/head-cleanup.md) -- Remove unnecessary wp_head output (emoji, oEmbed, feeds, etc.)
+- [GraphQL Performance](docs/graphql-performance.md) -- Cache-control headers, object cache, and query complexity limits
+- [CORS](docs/cors-module.md) -- Cross-origin resource sharing for browser-side API requests
+- [Security Headers](docs/security-headers.md) -- X-Content-Type-Options, HSTS, Referrer-Policy, Permissions-Policy
+- [Preview Mode](docs/preview-mode.md) -- JWT-based preview link rewriting with REST verification endpoint
+- [WP Migrate DB Compatibility](docs/migrate-db-compat.md) -- Bedrock directory structure fixes for WP Migrate DB Pro
+
+### Frontend Integration
+
+- [Next.js Caching & ISR Revalidation Guide](docs/nextjs-caching-revalidation.md) -- Configure Next.js caching, `revalidateTag` profiles, Vercel cache layers, and troubleshooting
+
 ## License
 
 GPL-3.0-or-later. See [LICENSE](https://www.gnu.org/licenses/gpl-3.0.html) for details.
