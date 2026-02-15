@@ -345,6 +345,10 @@ wp-headless-toolkit/
     validate-installation.php   # Installation validation script
 ```
 
+## Documentation
+
+- [Next.js Caching & ISR Revalidation Guide](docs/nextjs-caching-revalidation.md) -- How to configure Next.js caching, `revalidateTag` profiles, Vercel cache layers, and troubleshooting for on-demand revalidation with this plugin.
+
 ## License
 
 GPL-3.0-or-later. See [LICENSE](https://www.gnu.org/licenses/gpl-3.0.html) for details.
