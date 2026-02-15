@@ -164,6 +164,7 @@ class CloudflarePurge implements ModuleInterface {
 		self::$purge_requested = true;
 
 		// 1. Full-domain Cloudflare cache purge via Breeze.
+		/** @phpstan-ignore class.notFound */
 		\Breeze_CloudFlare_Helper::reset_all_cache();
 
 		// 2. Flush GraphQL object cache group (WP 6.1+).
