@@ -100,6 +100,7 @@ function wp_headless_init(): void {
 
 	if ( empty( $not_ready ) && defined( 'WP_HEADLESS_PLUGIN_DIR' ) ) {
 		require_once WP_HEADLESS_PLUGIN_DIR . 'src/Main.php';
+		\ProjectAssistant\HeadlessToolkit\Main::instance();
 		return;
 	}
 
