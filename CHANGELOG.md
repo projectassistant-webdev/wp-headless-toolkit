@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.5.0] - 2026-02-16
+
+### Fixed
+- **Module initialization** -- Plugin now correctly calls `Main::instance()` during bootstrap, ensuring all modules load
+- **Autoloader guard** -- `includes()` now checks `file_exists()` before requiring `vendor/autoload.php`, preventing fatal errors on Bedrock installations where the root Composer handles autoloading
+- **REST Security self-blocking** -- Added `/wp-headless-toolkit/` to the unauthenticated access whitelist so the plugin's own REST endpoints (e.g., preview token verification) are not blocked by the REST Security module
+
+### Changed
+- **README** -- Added Compatibility section documenting hosting requirements; added CloudflarePurge module to module reference; clarified WP Migrate DB requires Pro version; clarified env config works beyond Bedrock
+- **CHANGELOG** -- Fixed inaccurate "Cloudflare Enterprise" reference (module works with any Cloudflare plan via Breeze)
+
+---
+
 ## [1.4.0] - 2026-02-15
 
 ### Added
