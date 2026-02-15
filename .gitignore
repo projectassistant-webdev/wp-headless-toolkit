@@ -86,6 +86,17 @@ page-*.png
 scripts/
 docs/*
 !docs/nextjs-caching-revalidation.md
+!docs/plugin-architecture.md
+!docs/isr-revalidation.md
+!docs/cloudflare-purge.md
+!docs/rest-api-security.md
+!docs/frontend-redirect.md
+!docs/head-cleanup.md
+!docs/graphql-performance.md
+!docs/cors-module.md
+!docs/security-headers.md
+!docs/preview-mode.md
+!docs/migrate-db-compat.md
 memory/
 tools/
 templates/
