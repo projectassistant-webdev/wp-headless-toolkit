@@ -12,7 +12,8 @@ Unified headless WordPress plugin for Next.js projects. Provides ISR revalidatio
 - **CORS** -- Configurable CORS headers for browser-side API requests
 - **Security Headers** -- X-Content-Type-Options, HSTS, Referrer-Policy, and more
 - **Preview Mode** -- JWT-based preview link rewriting for authenticated draft access
-- **WP Migrate DB Compatibility** -- Ensures WP Migrate DB works alongside headless configuration
+- **Cloudflare Purge** -- Full-domain Cloudflare CDN cache purge on content changes via Breeze integration
+- **WP Migrate DB Compatibility** -- Resolves WP Migrate DB Pro path issues on Bedrock installations
 
 ## Requirements
 
@@ -20,6 +21,24 @@ Unified headless WordPress plugin for Next.js projects. Provides ISR revalidatio
 - WordPress 6.4 or higher
 - [WPGraphQL](https://www.wpgraphql.com/) 2.0+ (required dependency)
 - Composer for installation
+
+## Compatibility
+
+WP Headless Toolkit works on **any** WordPress hosting provider -- it is not tied to a specific host. Both standard WordPress and [Bedrock](https://roots.io/bedrock/) installations are supported.
+
+**Configuration** can be supplied via:
+- `.env` files (Bedrock, or any dotenv library)
+- Server environment variables (Apache `SetEnv`, Nginx `fastcgi_param`, Docker)
+- `wp-config.php` constants (standard WordPress)
+
+The plugin resolves values in the order: environment variable > `wp-config.php` constant > default.
+
+**Optional third-party dependencies** -- Two modules auto-disable when their prerequisites are absent:
+
+- **CloudflarePurge** -- Requires the [Breeze](https://wordpress.org/plugins/breeze/) caching plugin (bundled with Cloudways hosting, but installable anywhere) with Cloudflare CDN enabled in its settings. Works with any Cloudflare plan (Free, Pro, Business, Enterprise).
+- **WP Migrate DB Compatibility** -- Requires [WP Migrate DB Pro](https://deliciousbrains.com/wp-migrate-db-pro/) (the paid version, not the free WP Migrate Lite). Resolves Bedrock directory structure path calculation issues (`web/app/` vs `wp-content/`).
+
+All other modules have zero external dependencies beyond the core requirements listed above.
 
 ## Installation
 
@@ -63,7 +82,7 @@ The plugin will be installed to `wp-content/plugins/wp-headless-toolkit/`.
 
 1. Install the plugin via Composer
 2. Activate the plugin in WordPress admin (requires WPGraphQL to be active)
-3. Add environment variables to your `.env` file or `wp-config.php`:
+3. Add environment variables to your `.env` file (Bedrock or any dotenv setup), server configuration, or `wp-config.php`:
 
 ```bash
 # Required: Your Next.js frontend URL
@@ -163,9 +182,26 @@ Rewrites WordPress preview links to point to your Next.js preview route. Generat
 | `WP_HEADLESS_PREVIEW_TOKEN_EXPIRY` | Token expiry in seconds | `300` |
 | `WP_HEADLESS_DISABLE_PREVIEW_MODE` | Set to `true` to disable this module | `false` |
 
-### 9. WP Migrate DB Compatibility
+### 9. Cloudflare Purge
 
-Ensures WP Migrate DB works alongside the headless configuration by excluding its endpoints from REST API filtering.
+Purges the full Cloudflare CDN cache when content changes, using the Breeze plugin's Cloudflare integration. Also flushes the GraphQL object cache group on each content change.
+
+- Hooks into `save_post`, `delete_post`, `wp_trash_post`, `edited_term`, `delete_term`, `wp_update_nav_menu`
+- Runs at priority 20 (after ISR Revalidation at priority 10) so revalidation completes before the CDN cache is cleared
+- Debounced: only one purge per PHP request regardless of bulk operations
+- Auto-disables when the Breeze plugin is not active or Cloudflare is not enabled in Breeze
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| _None_ | Configuration is auto-detected from Breeze settings | -- |
+
+**Prerequisite:** [Breeze](https://wordpress.org/plugins/breeze/) plugin with Cloudflare integration configured. Works with any Cloudflare plan (Free, Pro, Business, Enterprise).
+
+### 10. WP Migrate DB Compatibility
+
+Resolves WP Migrate DB Pro path calculation issues on Bedrock's non-standard directory structure (`web/app/` instead of `wp-content/`). Also excludes WP Migrate DB endpoints from REST API filtering so migrations are not blocked.
+
+Requires WP Migrate DB **Pro** (the paid version). The free WP Migrate Lite plugin is not supported. Auto-disables when WP Migrate DB Pro is not installed.
 
 | Variable | Description | Default |
 |----------|-------------|---------|
@@ -173,7 +209,7 @@ Ensures WP Migrate DB works alongside the headless configuration by excluding it
 
 ## Environment Variables Reference
 
-All configuration is done through environment variables (`.env` for Bedrock, or `wp-config.php` constants for standard WordPress). Priority: environment variable > wp-config constant > default value.
+All configuration is done through environment variables or `wp-config.php` constants. Environment variables can come from `.env` files (Bedrock or any dotenv library), server configuration (Apache/Nginx), or Docker. Priority: environment variable > wp-config constant > default value.
 
 ### Core Configuration
 
@@ -334,6 +370,7 @@ wp-headless-toolkit/
     Modules/
       ModuleInterface.php       # Contract for all modules
       Revalidation/             # ISR revalidation module
+      CloudflarePurge/          # Cloudflare CDN purge via Breeze
       RestSecurity/             # REST API endpoint filtering
       HeadCleanup/              # Head element cleanup
       FrontendRedirect/         # Visitor redirect module

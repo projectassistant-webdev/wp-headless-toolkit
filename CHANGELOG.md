@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.5.0] - 2026-02-16
+
+### Fixed
+- **Module initialization** -- Plugin now correctly calls `Main::instance()` during bootstrap, ensuring all modules load
+- **Autoloader guard** -- `includes()` now checks `file_exists()` before requiring `vendor/autoload.php`, preventing fatal errors on Bedrock installations where the root Composer handles autoloading
+- **REST Security self-blocking** -- Added `/wp-headless-toolkit/` to the unauthenticated access whitelist so the plugin's own REST endpoints (e.g., preview token verification) are not blocked by the REST Security module
+
+### Changed
+- **README** -- Added Compatibility section documenting hosting requirements; added CloudflarePurge module to module reference; clarified WP Migrate DB requires Pro version; clarified env config works beyond Bedrock
+- **CHANGELOG** -- Fixed inaccurate "Cloudflare Enterprise" reference (module works with any Cloudflare plan via Breeze)
+
+---
+
+## [1.4.0] - 2026-02-15
+
+### Added
+- **Cloudflare Purge module** -- Full-domain Cloudflare CDN cache purge on content changes via Breeze integration
+  - Hooks into `save_post`, `delete_post`, `wp_trash_post`, `edited_term`, `delete_term`, `wp_update_nav_menu`
+  - Runs at priority 20 (after ISR Revalidation at priority 10)
+  - Debounced: only one purge per PHP request regardless of bulk operations
+  - Auto-disables when the Breeze plugin is not active or Cloudflare is not enabled in Breeze
+  - Also flushes GraphQL object cache group on content change
+  - Fires `wp_headless_cloudflare_purged` action for extensibility
+
+---
+
 ## [1.3.0] - 2026-02-13
 
 ### Changed
