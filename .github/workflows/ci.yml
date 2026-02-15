@@ -1,0 +1,565 @@
+# GitHub Actions CI for WP Headless Toolkit
+# Runs PHPCS linting, PHPStan static analysis, and Codeception WPUnit tests.
+#
+# Pipeline tiers (mirrors Bitbucket Pipelines):
+#   pull_request: parallel(lint + analyze + test-smoke) -- fast feedback (<60s tests)
+#   staging push: parallel(lint + analyze) -> test-with-coverage (60% threshold)
+#   main push:    parallel(lint + analyze) -> test -> create-release-tag
+
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+  pull_request:
+    branches:
+      - main
+      - staging
+
+jobs:
+  # ──────────────────────────────────────────────────────────
+  # PHPCS Lint (runs on all triggers)
+  # ──────────────────────────────────────────────────────────
+  lint:
+    name: PHPCS Lint
+    runs-on: ubuntu-latest
+    container:
+      image: php:8.1-cli
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: apt-get update && apt-get install -y --no-install-recommends git unzip zip
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-
+
+      - name: Install Composer
+        run: curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+      - name: Install dependencies
+        run: |
+          export COMPOSER_ALLOW_SUPERUSER=1
+          composer install --no-interaction --prefer-dist --ignore-platform-reqs
+
+      - name: Run PHPCS
+        run: |
+          export COMPOSER_ALLOW_SUPERUSER=1
+          composer lint
+
+  # ──────────────────────────────────────────────────────────
+  # PHPStan Analysis (runs on all triggers)
+  # ──────────────────────────────────────────────────────────
+  analyze:
+    name: PHPStan Analysis
+    runs-on: ubuntu-latest
+    container:
+      image: php:8.1-cli
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: apt-get update && apt-get install -y --no-install-recommends git unzip zip
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-
+
+      - name: Install Composer
+        run: curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+      - name: Install dependencies
+        run: |
+          export COMPOSER_ALLOW_SUPERUSER=1
+          composer install --no-interaction --prefer-dist --ignore-platform-reqs
+
+      - name: Run PHPStan
+        run: |
+          export COMPOSER_ALLOW_SUPERUSER=1
+          composer phpstan
+
+  # ──────────────────────────────────────────────────────────
+  # WPUnit Tests - Smoke + Unit (PRs only -- fast feedback)
+  # ──────────────────────────────────────────────────────────
+  test-smoke:
+    name: WPUnit Tests (Smoke + Unit)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    container:
+      image: php:8.1-cli
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: wordpress_test
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -u root -proot --silent"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          apt-get update && apt-get install -y --no-install-recommends \
+            git unzip zip less default-mysql-client subversion \
+            libpng-dev libjpeg-dev libfreetype6-dev libzip-dev
+
+      - name: Install PHP extensions
+        run: |
+          docker-php-ext-configure gd --with-freetype --with-jpeg
+          docker-php-ext-install mysqli pdo pdo_mysql gd zip
+
+      - name: Set PHP memory limit
+        run: echo "memory_limit = 512M" > /usr/local/etc/php/conf.d/memory.ini
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-
+
+      - name: Install Composer
+        run: curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+      - name: Install dependencies
+        run: |
+          export COMPOSER_ALLOW_SUPERUSER=1
+          composer install --no-interaction --prefer-dist
+
+      - name: Install WP-CLI
+        run: |
+          curl -o /usr/local/bin/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+          chmod +x /usr/local/bin/wp
+
+      - name: Setup WordPress
+        run: |
+          mkdir -p /var/www/html
+          wp core download --path=/var/www/html --allow-root
+          wp config create \
+            --path=/var/www/html \
+            --dbname=wordpress_test \
+            --dbuser=root \
+            --dbpass=root \
+            --dbhost=mysql \
+            --allow-root
+          wp db create --path=/var/www/html --allow-root 2>/dev/null || true
+          wp core install \
+            --path=/var/www/html \
+            --url=http://localhost \
+            --title="WP Headless Toolkit CI" \
+            --admin_user=admin \
+            --admin_password=admin \
+            --admin_email=admin@example.com \
+            --skip-email \
+            --allow-root
+
+      - name: Install WPGraphQL
+        run: wp plugin install wp-graphql --version=1.27.0 --activate --path=/var/www/html --allow-root
+
+      - name: Link and activate plugin
+        run: |
+          ln -s "$GITHUB_WORKSPACE" /var/www/html/wp-content/plugins/wp-headless-toolkit
+          wp plugin activate wp-headless-toolkit --path=/var/www/html --allow-root
+
+      - name: Download WordPress test library
+        run: |
+          WP_VERSION=$(wp core version --path=/var/www/html --allow-root)
+          WP_TESTS_DIR=/tmp/wordpress-tests-lib
+          mkdir -p "$WP_TESTS_DIR"
+          svn co --quiet "https://develop.svn.wordpress.org/tags/${WP_VERSION}/tests/phpunit/includes/" "${WP_TESTS_DIR}/includes"
+          svn co --quiet "https://develop.svn.wordpress.org/tags/${WP_VERSION}/tests/phpunit/data/" "${WP_TESTS_DIR}/data"
+
+      - name: Create wp-tests-config.php
+        run: |
+          cat > /tmp/wordpress-tests-lib/wp-tests-config.php <<'WPCONFIG'
+          <?php
+          define( 'ABSPATH', '/var/www/html/' );
+          define( 'DB_NAME', 'wordpress_test' );
+          define( 'DB_USER', 'root' );
+          define( 'DB_PASSWORD', 'root' );
+          define( 'DB_HOST', 'mysql' );
+          define( 'DB_CHARSET', 'utf8' );
+          define( 'DB_COLLATE', '' );
+          define( 'WP_TESTS_DOMAIN', 'localhost' );
+          define( 'WP_TESTS_EMAIL', 'admin@example.com' );
+          define( 'WP_TESTS_TITLE', 'WP Headless Toolkit CI' );
+          define( 'WP_PHP_BINARY', 'php' );
+          $table_prefix = 'wptests_';
+          WPCONFIG
+
+      - name: Configure Codeception for CI
+        run: |
+          cp codeception.dist.yml codeception.yml
+          sed -i 's/dbHost:.*mysql/dbHost: mysql/' codeception.yml
+
+      - name: Disable WP cron shutdown fatal
+        run: |
+          mkdir -p /var/www/html/wp-content/mu-plugins
+          echo '<?php remove_action("shutdown","_wp_cron",10);' > /var/www/html/wp-content/mu-plugins/disable-test-cron.php
+
+      - name: Run smoke + unit tests
+        run: |
+          vendor/bin/codecept run wpunit --group smoke --group unit --fail-fast 2>&1 | tee /tmp/test-output.txt || true
+          if grep -q "OK (" /tmp/test-output.txt; then
+            echo ""
+            echo "All tests passed."
+            exit 0
+          fi
+          echo "Tests failed - check output above."
+          exit 1
+
+  # ──────────────────────────────────────────────────────────
+  # WPUnit Tests - Full Suite (main branch)
+  # ──────────────────────────────────────────────────────────
+  test:
+    name: WPUnit Tests
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [lint, analyze]
+    runs-on: ubuntu-latest
+    container:
+      image: php:8.1-cli
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: wordpress_test
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -u root -proot --silent"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          apt-get update && apt-get install -y --no-install-recommends \
+            git unzip zip less default-mysql-client subversion \
+            libpng-dev libjpeg-dev libfreetype6-dev libzip-dev
+
+      - name: Install PHP extensions
+        run: |
+          docker-php-ext-configure gd --with-freetype --with-jpeg
+          docker-php-ext-install mysqli pdo pdo_mysql gd zip
+
+      - name: Set PHP memory limit
+        run: echo "memory_limit = 512M" > /usr/local/etc/php/conf.d/memory.ini
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-
+
+      - name: Install Composer
+        run: curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+      - name: Install dependencies
+        run: |
+          export COMPOSER_ALLOW_SUPERUSER=1
+          composer install --no-interaction --prefer-dist
+
+      - name: Install WP-CLI
+        run: |
+          curl -o /usr/local/bin/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+          chmod +x /usr/local/bin/wp
+
+      - name: Setup WordPress
+        run: |
+          mkdir -p /var/www/html
+          wp core download --path=/var/www/html --allow-root
+          wp config create \
+            --path=/var/www/html \
+            --dbname=wordpress_test \
+            --dbuser=root \
+            --dbpass=root \
+            --dbhost=mysql \
+            --allow-root
+          wp db create --path=/var/www/html --allow-root 2>/dev/null || true
+          wp core install \
+            --path=/var/www/html \
+            --url=http://localhost \
+            --title="WP Headless Toolkit CI" \
+            --admin_user=admin \
+            --admin_password=admin \
+            --admin_email=admin@example.com \
+            --skip-email \
+            --allow-root
+
+      - name: Install WPGraphQL
+        run: wp plugin install wp-graphql --version=1.27.0 --activate --path=/var/www/html --allow-root
+
+      - name: Link and activate plugin
+        run: |
+          ln -s "$GITHUB_WORKSPACE" /var/www/html/wp-content/plugins/wp-headless-toolkit
+          wp plugin activate wp-headless-toolkit --path=/var/www/html --allow-root
+
+      - name: Download WordPress test library
+        run: |
+          WP_VERSION=$(wp core version --path=/var/www/html --allow-root)
+          WP_TESTS_DIR=/tmp/wordpress-tests-lib
+          mkdir -p "$WP_TESTS_DIR"
+          svn co --quiet "https://develop.svn.wordpress.org/tags/${WP_VERSION}/tests/phpunit/includes/" "${WP_TESTS_DIR}/includes"
+          svn co --quiet "https://develop.svn.wordpress.org/tags/${WP_VERSION}/tests/phpunit/data/" "${WP_TESTS_DIR}/data"
+
+      - name: Create wp-tests-config.php
+        run: |
+          cat > /tmp/wordpress-tests-lib/wp-tests-config.php <<'WPCONFIG'
+          <?php
+          define( 'ABSPATH', '/var/www/html/' );
+          define( 'DB_NAME', 'wordpress_test' );
+          define( 'DB_USER', 'root' );
+          define( 'DB_PASSWORD', 'root' );
+          define( 'DB_HOST', 'mysql' );
+          define( 'DB_CHARSET', 'utf8' );
+          define( 'DB_COLLATE', '' );
+          define( 'WP_TESTS_DOMAIN', 'localhost' );
+          define( 'WP_TESTS_EMAIL', 'admin@example.com' );
+          define( 'WP_TESTS_TITLE', 'WP Headless Toolkit CI' );
+          define( 'WP_PHP_BINARY', 'php' );
+          $table_prefix = 'wptests_';
+          WPCONFIG
+
+      - name: Configure Codeception for CI
+        run: |
+          cp codeception.dist.yml codeception.yml
+          sed -i 's/dbHost:.*mysql/dbHost: mysql/' codeception.yml
+
+      - name: Disable WP cron shutdown fatal
+        run: |
+          mkdir -p /var/www/html/wp-content/mu-plugins
+          echo '<?php remove_action("shutdown","_wp_cron",10);' > /var/www/html/wp-content/mu-plugins/disable-test-cron.php
+
+      - name: Run full test suite
+        run: |
+          vendor/bin/codecept run wpunit --fail-fast 2>&1 | tee /tmp/test-output.txt || true
+          if grep -q "OK (" /tmp/test-output.txt; then
+            echo ""
+            echo "All tests passed."
+            exit 0
+          fi
+          echo "Tests failed - check output above."
+          exit 1
+
+  # ──────────────────────────────────────────────────────────
+  # WPUnit Tests - Full Suite + Coverage (staging branch)
+  # ──────────────────────────────────────────────────────────
+  test-with-coverage:
+    name: WPUnit Tests (Full Suite + Coverage)
+    if: github.event_name == 'push' && github.ref == 'refs/heads/staging'
+    needs: [lint, analyze]
+    runs-on: ubuntu-latest
+    container:
+      image: php:8.1-cli
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: wordpress_test
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -u root -proot --silent"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          apt-get update && apt-get install -y --no-install-recommends \
+            git unzip zip less default-mysql-client subversion \
+            libpng-dev libjpeg-dev libfreetype6-dev libzip-dev \
+            $PHPIZE_DEPS
+
+      - name: Install PHP extensions
+        run: |
+          docker-php-ext-configure gd --with-freetype --with-jpeg
+          docker-php-ext-install mysqli pdo pdo_mysql gd zip
+
+      - name: Install pcov for code coverage
+        run: |
+          pecl install pcov && docker-php-ext-enable pcov
+          echo "pcov.directory=/var/www/html/wp-content/plugins/wp-headless-toolkit/src" >> /usr/local/etc/php/conf.d/pcov.ini
+          if ! php -m | grep -q pcov; then
+            echo "ERROR: pcov extension not loaded"
+            exit 1
+          fi
+          echo "pcov loaded successfully"
+
+      - name: Set PHP memory limit
+        run: echo "memory_limit = 512M" > /usr/local/etc/php/conf.d/memory.ini
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-
+
+      - name: Install Composer
+        run: curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+      - name: Install dependencies
+        run: |
+          export COMPOSER_ALLOW_SUPERUSER=1
+          composer install --no-interaction --prefer-dist
+
+      - name: Install WP-CLI
+        run: |
+          curl -o /usr/local/bin/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+          chmod +x /usr/local/bin/wp
+
+      - name: Setup WordPress
+        run: |
+          mkdir -p /var/www/html
+          wp core download --path=/var/www/html --allow-root
+          wp config create \
+            --path=/var/www/html \
+            --dbname=wordpress_test \
+            --dbuser=root \
+            --dbpass=root \
+            --dbhost=mysql \
+            --allow-root
+          wp db create --path=/var/www/html --allow-root 2>/dev/null || true
+          wp core install \
+            --path=/var/www/html \
+            --url=http://localhost \
+            --title="WP Headless Toolkit CI" \
+            --admin_user=admin \
+            --admin_password=admin \
+            --admin_email=admin@example.com \
+            --skip-email \
+            --allow-root
+
+      - name: Install WPGraphQL
+        run: wp plugin install wp-graphql --version=1.27.0 --activate --path=/var/www/html --allow-root
+
+      - name: Link and activate plugin
+        run: |
+          ln -s "$GITHUB_WORKSPACE" /var/www/html/wp-content/plugins/wp-headless-toolkit
+          wp plugin activate wp-headless-toolkit --path=/var/www/html --allow-root
+
+      - name: Download WordPress test library
+        run: |
+          WP_VERSION=$(wp core version --path=/var/www/html --allow-root)
+          WP_TESTS_DIR=/tmp/wordpress-tests-lib
+          mkdir -p "$WP_TESTS_DIR"
+          svn co --quiet "https://develop.svn.wordpress.org/tags/${WP_VERSION}/tests/phpunit/includes/" "${WP_TESTS_DIR}/includes"
+          svn co --quiet "https://develop.svn.wordpress.org/tags/${WP_VERSION}/tests/phpunit/data/" "${WP_TESTS_DIR}/data"
+
+      - name: Create wp-tests-config.php
+        run: |
+          cat > /tmp/wordpress-tests-lib/wp-tests-config.php <<'WPCONFIG'
+          <?php
+          define( 'ABSPATH', '/var/www/html/' );
+          define( 'DB_NAME', 'wordpress_test' );
+          define( 'DB_USER', 'root' );
+          define( 'DB_PASSWORD', 'root' );
+          define( 'DB_HOST', 'mysql' );
+          define( 'DB_CHARSET', 'utf8' );
+          define( 'DB_COLLATE', '' );
+          define( 'WP_TESTS_DOMAIN', 'localhost' );
+          define( 'WP_TESTS_EMAIL', 'admin@example.com' );
+          define( 'WP_TESTS_TITLE', 'WP Headless Toolkit CI' );
+          define( 'WP_PHP_BINARY', 'php' );
+          $table_prefix = 'wptests_';
+          WPCONFIG
+
+      - name: Configure Codeception for CI
+        run: |
+          cp codeception.dist.yml codeception.yml
+          sed -i 's/dbHost:.*mysql/dbHost: mysql/' codeception.yml
+
+      - name: Disable WP cron shutdown fatal
+        run: |
+          mkdir -p /var/www/html/wp-content/mu-plugins
+          echo '<?php remove_action("shutdown","_wp_cron",10);' > /var/www/html/wp-content/mu-plugins/disable-test-cron.php
+
+      - name: Run tests with coverage
+        run: |
+          vendor/bin/codecept run wpunit --fail-fast --coverage --coverage-xml 2>&1 | tee /tmp/test-output.txt || true
+          if grep -q "OK (" /tmp/test-output.txt; then
+            echo ""
+            echo "All tests passed."
+            # Coverage threshold check
+            COVERAGE_THRESHOLD=60
+            if [ ! -f tests/_output/coverage.xml ]; then
+              echo "ERROR: Coverage report tests/_output/coverage.xml not found after tests passed."
+              echo "FAIL: Cannot verify coverage threshold without coverage report."
+              exit 1
+            fi
+            COVERED=$(sed -n 's/.*coveredstatements="\([0-9]*\)".*/\1/p' tests/_output/coverage.xml | tail -1)
+            TOTAL=$(sed -n 's/.*statements="\([0-9]*\)".*/\1/p' tests/_output/coverage.xml | tail -1)
+            if [ -z "$COVERED" ] || [ -z "$TOTAL" ] || [ "$TOTAL" -le 0 ]; then
+              echo "ERROR: Could not parse coverage metrics from tests/_output/coverage.xml."
+              echo "  COVERED='${COVERED}' TOTAL='${TOTAL}'"
+              echo "FAIL: Coverage threshold check requires valid coverage data."
+              exit 1
+            fi
+            COVERAGE=$(( (COVERED * 100) / TOTAL ))
+            echo "Coverage: ${COVERAGE}% (${COVERED}/${TOTAL} statements)"
+            if [ "$COVERAGE" -lt "$COVERAGE_THRESHOLD" ]; then
+              echo "FAIL: Coverage ${COVERAGE}% is below threshold ${COVERAGE_THRESHOLD}%"
+              exit 1
+            fi
+            echo "PASS: Coverage ${COVERAGE}% meets threshold ${COVERAGE_THRESHOLD}%"
+            exit 0
+          fi
+          echo "Tests failed - check output above."
+          exit 1
+
+      - name: Upload coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: tests/_output/coverage.xml
+          if-no-files-found: ignore
+
+  # ──────────────────────────────────────────────────────────
+  # Create Release Tag (main branch only, after tests pass)
+  # ──────────────────────────────────────────────────────────
+  create-release-tag:
+    name: Create Release Tag
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [test]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract version and create tag
+        run: |
+          VERSION=$(sed -n 's/.*Version:\s*\([0-9]*\.[0-9]*\.[0-9]*\).*/\1/p' wp-headless-toolkit.php)
+          if [ -z "$VERSION" ]; then
+            echo "ERROR: Could not extract version from wp-headless-toolkit.php"
+            exit 1
+          fi
+          echo "Detected version: v${VERSION}"
+          git tag -a "v${VERSION}" -m "Release v${VERSION}" 2>/dev/null || echo "Tag v${VERSION} already exists"
+          git push origin "v${VERSION}" 2>/dev/null || echo "Tag already pushed"
