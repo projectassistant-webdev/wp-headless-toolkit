@@ -189,8 +189,8 @@ class Revalidation implements ModuleInterface {
 			'headers'     => [
 				'Content-Type' => 'application/json',
 			],
-			'timeout'     => 10,
-			'blocking'    => false,
+			'timeout'     => 3,
+			'blocking'    => true,
 			'data_format' => 'body',
 		];
 
