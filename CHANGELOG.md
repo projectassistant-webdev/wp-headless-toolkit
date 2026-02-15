@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Hooks into `save_post`, `delete_post`, `wp_trash_post`, `edited_term`, `delete_term`, `wp_update_nav_menu`
   - Runs at priority 20 (after ISR Revalidation at priority 10)
   - Debounced: only one purge per PHP request regardless of bulk operations
-  - Auto-disables when Breeze or Cloudflare Enterprise is not configured
+  - Auto-disables when the Breeze plugin is not active or Cloudflare is not enabled in Breeze
   - Also flushes GraphQL object cache group on content change
   - Fires `wp_headless_cloudflare_purged` action for extensibility
 
