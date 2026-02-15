@@ -72,7 +72,10 @@ if ( ! class_exists( 'ProjectAssistant\HeadlessToolkit\Main' ) ) :
 		 */
 		private function includes(): void {
 			if ( defined( 'WP_HEADLESS_AUTOLOAD' ) && false !== WP_HEADLESS_AUTOLOAD && defined( 'WP_HEADLESS_PLUGIN_DIR' ) ) { // @phpstan-ignore notIdentical.alwaysTrue
-				require_once WP_HEADLESS_PLUGIN_DIR . 'vendor/autoload.php';
+				$autoloader = WP_HEADLESS_PLUGIN_DIR . 'vendor/autoload.php';
+				if ( file_exists( $autoloader ) ) {
+					require_once $autoloader;
+				}
 			}
 		}
 
