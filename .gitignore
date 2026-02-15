@@ -84,7 +84,8 @@ page-*.png
 .secrets.baseline
 .pre-commit-config.yaml
 scripts/
-docs/
+docs/*
+!docs/nextjs-caching-revalidation.md
 memory/
 tools/
 templates/
