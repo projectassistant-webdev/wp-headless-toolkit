@@ -178,6 +178,15 @@ Rewrites WordPress preview links to point to your Next.js preview route. Generat
 | `WP_HEADLESS_PREVIEW_TOKEN_EXPIRY` | Token expiry in seconds | `300` |
 | `WP_HEADLESS_DISABLE_PREVIEW_MODE` | Set to `true` to disable this module | `false` |
 
+**Next.js frontend requirement:** The preview API route must resolve post slugs using **authenticated GraphQL** with `asPreview: true`. Without this, WPGraphQL returns `null` for draft/pending posts and the preview redirect falls back to a generic page. See [Preview Mode docs](docs/preview-mode.md) for the full implementation pattern.
+
+The following environment variables are needed on the **Next.js side** (not WordPress):
+
+| Variable | Description |
+|----------|-------------|
+| `WORDPRESS_PREVIEW_USER` | WordPress username with an application password |
+| `WORDPRESS_PREVIEW_APP_PASSWORD` | WordPress application password for authenticated GraphQL |
+
 ### 9. Cloudflare Purge
 
 Purges the full Cloudflare CDN cache when content changes, using the Breeze plugin's Cloudflare integration. Also flushes the GraphQL object cache group on each content change.
