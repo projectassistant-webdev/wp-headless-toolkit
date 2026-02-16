@@ -154,6 +154,91 @@ export default async function handler(req, res) {
 }
 ```
 
+### Authenticated slug resolution for preview redirect (Next.js App Router)
+
+When the preview API route needs to resolve the post slug (e.g., to redirect to `/blog/{category}/{slug}/`), the GraphQL query **must** use authenticated requests with `asPreview: true`. Without this, WPGraphQL only returns published posts for unauthenticated queries, so draft and pending posts return `null` and the redirect falls back to a generic page like `/blog/`.
+
+**Required environment variables (Next.js):**
+
+| Variable | Description |
+|----------|-------------|
+| `WORDPRESS_PREVIEW_USER` | WordPress username that has an application password configured |
+| `WORDPRESS_PREVIEW_APP_PASSWORD` | The WordPress application password for that user |
+
+**Example: App Router preview route with authenticated slug resolution**
+
+```typescript
+// app/api/preview/route.ts
+import { draftMode } from 'next/headers';
+import { redirect } from 'next/navigation';
+
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const secret = searchParams.get('secret');
+  const id = searchParams.get('id');
+
+  // Step 1: Verify JWT with WordPress REST API
+  const verifyRes = await fetch(
+    `${process.env.WORDPRESS_URL}/wp-json/wp-headless-toolkit/v1/preview/verify?token=${secret}`
+  );
+  const verifyData = await verifyRes.json();
+
+  if (!verifyData.valid) {
+    return new Response('Invalid token', { status: 401 });
+  }
+
+  // Step 2: Enable draft mode
+  const draft = await draftMode();
+  draft.enable();
+
+  // Step 3: Resolve slug via AUTHENTICATED GraphQL with asPreview: true
+  const previewUser = process.env.WORDPRESS_PREVIEW_USER;
+  const previewPass = process.env.WORDPRESS_PREVIEW_APP_PASSWORD;
+  let redirectUrl = '/blog/';
+
+  if (previewUser && previewPass) {
+    const authHeader = `Basic ${Buffer.from(`${previewUser}:${previewPass}`).toString('base64')}`;
+    const graphqlRes = await fetch(`${process.env.WORDPRESS_URL}/graphql`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: authHeader,
+      },
+      body: JSON.stringify({
+        query: `
+          query GetPostSlugById($id: ID!) {
+            post(id: $id, idType: DATABASE_ID, asPreview: true) {
+              slug
+              categories { nodes { slug } }
+            }
+          }
+        `,
+        variables: { id },
+      }),
+    });
+    const graphqlData = await graphqlRes.json();
+    const post = graphqlData?.data?.post;
+
+    if (post?.slug) {
+      const category = post.categories?.nodes?.[0]?.slug || 'uncategorized';
+      redirectUrl = `/blog/${category}/${post.slug}/`;
+    }
+  }
+
+  // Step 4: Redirect to the resolved URL
+  redirect(redirectUrl);
+}
+```
+
+**Why `asPreview: true` is required:**
+
+WPGraphQL respects WordPress access control. Without authentication and the `asPreview: true` argument:
+- **Published posts**: Returned normally (no issue)
+- **Draft posts**: Return `null` (not publicly visible)
+- **Pending review posts**: Return `null` (not publicly visible)
+
+The `asPreview: true` argument tells WPGraphQL to return the latest revision of the post, which is the draft content the editor wants to preview. Combined with authenticated credentials, this allows the preview route to resolve the slug for any post status.
+
 ## Disabling
 
 Disable the module by defining the constant or setting the environment variable:
