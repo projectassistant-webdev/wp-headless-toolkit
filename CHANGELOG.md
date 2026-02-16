@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.6.0] - 2026-02-17
+
+### Added
+- **GraphQL cache flush endpoint** -- `POST /wp-json/wp-headless-toolkit/v1/flush-graphql-cache` secured with `NEXTJS_REVALIDATION_SECRET`
+  - Flushes only the `wp_headless_toolkit_graphql` Redis cache group (surgical, not full cache flush)
+  - Falls back to `wp_cache_flush()` on non-Redis environments
+  - Enables Next.js frontend builds to self-correct when stale cached GraphQL responses are detected
+  - Fires `wp_headless_graphql_cache_flushed` action after flush
+
+---
+
 ## [1.5.0] - 2026-02-16
 
 ### Fixed
