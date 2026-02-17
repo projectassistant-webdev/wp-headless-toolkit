@@ -256,8 +256,14 @@ class GraphqlPerformance implements ModuleInterface {
 			return $cached;
 		}
 
-		// Store in cache.
-		wp_cache_set( $cache_key, $response, self::CACHE_GROUP, $ttl );
+		// Sanitize response before caching: WPGraphQL response objects may contain
+		// Closures or other non-serializable values that crash Object Cache Pro's
+		// Redis serialization. Converting through JSON safely strips these.
+		$safe = json_decode( wp_json_encode( $response ), true );
+
+		if ( null !== $safe ) {
+			wp_cache_set( $cache_key, $safe, self::CACHE_GROUP, $ttl );
+		}
 
 		return $response;
 	}
