@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.6.1] - 2026-02-17
+
+### Fixed
+- **GraphQL cache serialization** -- Response objects are now sanitized through `json_decode(wp_json_encode())` before cache storage to safely strip Closures and other non-serializable values that crash Object Cache Pro's Redis serialization (fixes empty GraphQL responses with WPGraphQL 2.9.0+)
+
+---
+
+## [1.6.0] - 2026-02-17
+
+### Added
+- **GraphQL cache flush endpoint** -- New REST API endpoint `POST /wp-json/wp-headless-toolkit/v1/flush-graphql-cache` allows the Next.js frontend to programmatically flush the GraphQL object cache group when cache corruption is detected
+  - Secured via `NEXTJS_REVALIDATION_SECRET` shared secret
+  - Falls back to full cache flush if group flush is not supported (non-Redis environments)
+  - Fires `wp_headless_graphql_cache_flushed` action for extensibility
+
+---
+
 ## [1.5.0] - 2026-02-16
 
 ### Fixed
