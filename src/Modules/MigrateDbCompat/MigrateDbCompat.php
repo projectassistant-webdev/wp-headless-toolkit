@@ -39,8 +39,9 @@ class MigrateDbCompat implements ModuleInterface {
 		}
 
 		// Only enable if WP Migrate DB Pro is active.
-		return class_exists( '\DeliciousBrains\WPMDB\Pro\Plugin\ProPlugin' )
-			|| defined( 'WPMDB_PRO_VERSION' );
+		return defined( 'WPMDBPRO_FILE' )
+			|| defined( 'WPMDB_PRO_VERSION' )
+			|| class_exists( '\DeliciousBrains\WPMDB\Pro\Plugin\ProPlugin' );
 	}
 
 	/**
