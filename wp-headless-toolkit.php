@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Description: Unified headless WordPress plugin for Next.js projects - ISR revalidation, REST security, CORS, preview mode, and more.
  * Author: Project Assistant
  * Author URI: https://projectassistant.org
- * Version: 1.6.1
+ * Version: 1.7.0
  * Text Domain: wp-headless-toolkit
  * Domain Path: /languages
  * Requires at least: 6.4
